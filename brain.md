@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-Baseline toolchain, package structure, and all 10 core project directories (client, server, shared, detector, executor, persistence, mock-forms-api, seed, tests, docs) have been configured. Builds, types, tests, and lint checks are verified and passing. The next step is to freeze IR, contracts, and validation.
+Baseline toolchain, project structure, and Health Shell (React frontend displaying "FlowTrace is ready" and backend serving GET `/health`) have been successfully implemented. Builds, types, tests, and lint checks are all verified and passing. The next step is to freeze IR, contracts, and validation.
 
 ## Manual Build Order
 
