@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, and defined MVP scope document (docs/mvp-scope.md).
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), and added Zod schemas for runtime validation (shared/schemas.ts).
 
 ## Features Currently Being Built
 None.
@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-Foundation task verification is complete. The system is verified as **READY**. All core toolchains, directories, build pipelines, testing suites, health checks, and scope definitions are verified and functional. The next step is to freeze IR, contracts, and validation.
+Zod schemas for runtime validation of the IR and patch requests are defined in `shared/schemas.ts` and verified with comprehensive validation tests. Builds, types, tests, and lint checks are all verified and passing. The next step is to build the MongoDB persistence layer.
 
 ## Manual Build Order
 
