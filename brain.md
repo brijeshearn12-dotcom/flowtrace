@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, and creation of the 10 core project folders (client, server, shared, detector, executor, persistence, mock-forms-api, seed, tests, docs).
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, and defined MVP scope document (docs/mvp-scope.md).
 
 ## Features Currently Being Built
 None.
@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-Baseline toolchain, project structure, and Health Shell (React frontend displaying "FlowTrace is ready" and backend serving GET `/health`) have been successfully implemented. Builds, types, tests, and lint checks are all verified and passing. The next step is to freeze IR, contracts, and validation.
+Baseline toolchain, project structure, Health Shell, and MVP scope definition (`docs/mvp-scope.md`) are complete. Builds, types, tests, and lint checks are all verified and passing. The next step is to freeze IR, contracts, and validation.
 
 ## Manual Build Order
 
