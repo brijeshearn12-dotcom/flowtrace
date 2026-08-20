@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), and added Zod schemas for runtime validation (shared/schemas.ts).
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), and implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts).
 
 ## Features Currently Being Built
 None.
@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-Zod schemas for runtime validation of the IR and patch requests are defined in `shared/schemas.ts` and verified with comprehensive validation tests. Builds, types, tests, and lint checks are all verified and passing. The next step is to build the MongoDB persistence layer.
+Workflow DAG graph invariants and validation rules are defined in `docs/execution-semantics.md` and implemented in `shared/validator.ts`. All 19 unit tests pass cleanly. The next step is to build the MongoDB persistence tier.
 
 ## Manual Build Order
 
