@@ -93,10 +93,10 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 `MONGODB_URI`, `MONGODB_DB`, `SERVER_PORT`, `CLIENT_URL`, `FORMS_API_BASE_URL`, `FORMS_API_TOKEN`, `LLM_ENABLED`, `LLM_MODEL`, and `LOG_LEVEL`. Never commit real secrets.
 
 ## Current Development Status
-Planning complete. Git repository initialized with .gitignore config in project root.
+Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, and Git initialization with .gitignore configuration.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, and Baseline Tools installation.
 
 ## Features Currently Being Built
 None.
@@ -130,7 +130,7 @@ LLM-only detection, production webhooks, cron scheduling, arbitrary agent action
 6. Rehearse deterministic demo.
 
 ## Testing Status
-No code tests have been run. Required tests include detector, schema, reference resolver, condition evaluator, executor, persistence/versioning, API, UI, and end-to-end tests.
+Baseline Vitest setup is passing (1 baseline test). Required tests to implement include detector, schema, reference resolver, condition evaluator, executor, persistence/versioning, API, UI, and end-to-end tests.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-Planning complete. Git repository is initialized in the project root, and `.gitignore` is configured to exclude local secrets and database data files. The next step is to freeze IR, contracts, and validation.
+Baseline toolchain and package structure are configured. React, React Flow, Dagre, Express, MongoDB driver, Zod, and Vitest are installed. Typecheck, build, linting, and testing pipelines are verified and passing. The next step is to freeze IR, contracts, and validation.
 
 ## Manual Build Order
 
