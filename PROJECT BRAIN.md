@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, and Baseline Tools installation.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, and creation of the 10 core project folders (client, server, shared, detector, executor, persistence, mock-forms-api, seed, tests, docs).
 
 ## Features Currently Being Built
 None.
@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-Baseline toolchain and package structure are configured. React, React Flow, Dagre, Express, MongoDB driver, Zod, and Vitest are installed. Typecheck, build, linting, and testing pipelines are verified and passing. The next step is to freeze IR, contracts, and validation.
+Baseline toolchain, package structure, and all 10 core project directories (client, server, shared, detector, executor, persistence, mock-forms-api, seed, tests, docs) have been configured. Builds, types, tests, and lint checks are verified and passing. The next step is to freeze IR, contracts, and validation.
 
 ## Manual Build Order
 
