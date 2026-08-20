@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), and defined canonical execution algorithm (docs/execution-semantics.md updated).
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), and finalized architecture and data flow diagrams (docs/architecture.md updated).
 
 ## Features Currently Being Built
 None.
@@ -211,7 +211,7 @@ A beginner-friendly nine-task construction manual was generated at `/home/ubuntu
 
 ## Current Status Update
 
-The sequential workflow execution algorithm—including variable resolution, evaluation of `eq`, `neq`, `gt` step conditions, failure routing (`abort`, `skip`, `redirect`), and persistence updates—is frozen in `docs/execution-semantics.md`. Builds, typechecks, and tests are verified and passing. The next step is to build the MongoDB persistence tier.
+The visual architecture data flow diagram mapping components, folders, and data contracts is finalized in `docs/architecture.md`. Builds, typechecks, and tests are verified and passing. The next step is to build the MongoDB persistence tier.
 
 ## Manual Build Order
 
