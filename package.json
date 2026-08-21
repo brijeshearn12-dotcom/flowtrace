@@ -12,8 +12,8 @@
     "build:server": "tsc -p server/tsconfig.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run --fileParallelism=false",
+    "test:watch": "vitest --fileParallelism=false"
   },
   "dependencies": {
     "react": "^18.3.1",

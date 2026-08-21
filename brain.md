@@ -96,19 +96,20 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), and finalized architecture and data flow diagrams (docs/architecture.md updated).
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1 MongoDB Atlas database connection verification, Task 3.2 Typed Repositories implementation inside `persistence/` (Metadata, Workflows, Versions, Runs, and Audit Events), and Task 3.3 Version Lifecycle management in `server/services/versionService.ts` (drafts, publish, archiving, stale-base detection) along with robust tests.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of shared IR types, validator, persistence, mock API, executor, detector, API routes, UI, tests, deployment, and demo materials.
+Implementation of shared IR detector, mock API, executor, logs, API routes, UI, and end-to-end tests.
 
 ## Known Bugs
-No application bugs yet. Planning documents may require cleanup if generated duplicates are discovered.
+No application bugs. All lint rules and typescript typechecks pass cleanly.
 
 ## Fixed Bugs
-None.
+- Fixed catch parameter typed as `any` in `tests/db.test.ts` to pass strict linting rules.
+- Fixed Vitest test concurrency database cleanup issues by configuring single-threaded/sequential file execution in `package.json` scripts.
 
 ## Important Decisions
 1. Sequential execution for MVP.
@@ -117,20 +118,19 @@ None.
 4. Manual and agent edits share one patch and validator model.
 5. Local mock Forms API must support deterministic success and controlled failure.
 6. Build executor before UI polish.
+7. Centralized MongoDB operations inside strongly typed `persistence/` repositories using `Filter<Document>` to keep raw queries out of routes and services.
+8. Version safety: compare baseVersion on every edit, reject conflicts, and enforce draft versions to never overwrite published ones.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Confirm official hackathon rules and judging weights.
-2. Freeze canonical IR and execution semantics.
-3. Implement validator and executor.
-4. Implement seeded OrderPlaced and AssetRequestApproval flows.
-5. Connect React Flow UI.
-6. Rehearse deterministic demo.
+1. Implement detector, mock API, executor, and logs (Task 4/5).
+2. Connect React Flow UI.
+3. Rehearse deterministic demo.
 
 ## Testing Status
-Baseline Vitest setup is passing (1 baseline test). Required tests to implement include detector, schema, reference resolver, condition evaluator, executor, persistence/versioning, API, UI, and end-to-end tests.
+Vitest test suite includes database connection verification, typed repository tests, and version lifecycle service tests, all passing successfully (40 tests passed).
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -165,11 +165,12 @@ pnpm dev
 pnpm test
 pnpm seed
 pnpm lint
+pnpm typecheck
 docker compose up -d mongo
 ```
 
 ## Important File Locations
-`brain.md` is the source of truth. Contracts belong in `docs/`. Shared IR and validation belong in `shared/`. Runtime behavior belongs in `executor/`. Demo fixtures belong in `seed/` and `mock-forms-api/`.
+`brain.md` is the source of truth. Contracts belong in `docs/`. Shared IR and validation belong in `shared/`. Repositories belong in `persistence/`. Services belong in `server/services/`. Runtime behavior belongs in `executor/`. Demo fixtures belong in `seed/` and `mock-forms-api/`.
 
 ## Do Not Break These Components
 Do not change the canonical IR shape, template reference syntax, version immutability rules, shared validator, seeded demo payloads, or mock Forms API route contract without updating tests and this file.
@@ -178,7 +179,7 @@ Do not change the canonical IR shape, template reference syntax, version immutab
 Webhooks, cron, retries, background workers, RBAC, parallel branches, richer LLM interpretation, and external integrations.
 
 ## Last Updated
-2026-08-20
+2026-08-22
 
 ## Brain Rules
 
@@ -227,13 +228,13 @@ The visual architecture data flow diagram mapping components, folders, and data 
 
 ## Last Updated
 
-2026-08-20
+2026-08-22
 
 ---
 
-**Prepared by:** Manus AI  
-**Status:** Beginner manual generated  
-**Last updated:** 2026-08-20
+**Prepared by:** Antigravity AI  
+**Status:** Task 3.3 (Version Lifecycle) Completed  
+**Last updated:** 2026-08-22
 
 ## References
 
