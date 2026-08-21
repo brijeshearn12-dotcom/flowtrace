@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1 MongoDB Atlas database connection verification, Task 3.2 Typed Repositories implementation inside `persistence/` (Metadata, Workflows, Versions, Runs, and Audit Events), and Task 3.3 Version Lifecycle management in `server/services/versionService.ts` (drafts, publish, archiving, stale-base detection) along with robust tests.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1 MongoDB Atlas database connection verification, Task 3.2 Typed Repositories implementation inside `persistence/` (Metadata, Workflows, Versions, Runs, and Audit Events), Task 3.3 Version Lifecycle management in `server/services/versionService.ts` (drafts, publish, archiving, stale-base detection) along with robust tests, Task 3.4 Project Metadata seeding (`seed/metadata.ts`) for forms, functions, buttons, and operations, Task 3.5 OrderPlaced workflow seeding (`seed/orderPlaced.ts`) containing order-created, invoice, confirmation, and fulfillment steps, Task 3.6 AssetRequestApproval workflow seeding (`seed/assetRequestApproval.ts`) containing approval, approved/rejected branches, and failure redirect, and Task 3.7 Workflow API routes (`server/routes/workflows.ts`) for listing, getting, validating, publishing, and version history.
 
 ## Features Currently Being Built
 None.
@@ -233,7 +233,7 @@ The visual architecture data flow diagram mapping components, folders, and data 
 ---
 
 **Prepared by:** Antigravity AI  
-**Status:** Task 3.3 (Version Lifecycle) Completed  
+**Status:** Task 3 Completed  
 **Last updated:** 2026-08-22
 
 ## References

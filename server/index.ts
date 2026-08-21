@@ -1,10 +1,12 @@
 import express from 'express';
 import { connectDB } from './db';
+import workflowsRouter from './routes/workflows';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
+app.use('/api/workflows', workflowsRouter);
 
 app.get('/health', async (_req, res) => {
   try {

@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run --fileParallelism=false",
-    "test:watch": "vitest --fileParallelism=false"
+    "test:watch": "vitest --fileParallelism=false",
+    "seed": "tsx seed/runSeeds.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
