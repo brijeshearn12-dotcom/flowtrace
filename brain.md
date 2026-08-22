@@ -96,13 +96,13 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1 MongoDB Atlas database connection verification, Task 3.2 Typed Repositories implementation inside `persistence/` (Metadata, Workflows, Versions, Runs, and Audit Events), Task 3.3 Version Lifecycle management in `server/services/versionService.ts` (drafts, publish, archiving, stale-base detection) along with robust tests, Task 3.4 Project Metadata seeding (`seed/metadata.ts`) for forms, functions, buttons, and operations, Task 3.5 OrderPlaced workflow seeding (`seed/orderPlaced.ts`) containing order-created, invoice, confirmation, and fulfillment steps, Task 3.6 AssetRequestApproval workflow seeding (`seed/assetRequestApproval.ts`) containing approval, approved/rejected branches, and failure redirect, Task 3.7 Workflow API routes (`server/routes/workflows.ts`) for listing, getting, validating, publishing, and version history, and Task 4.1 Forms API adapter (`executor/formsAdapter.ts`) — typed integration boundary between the FlowTrace executor and the external Forms/API environment, with normalizeSuccess/normalizeError helpers and full IFormsAdapter interface definition.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), and Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`) — deterministic `IFormsAdapter` implementation covering `FraudService.check`, `Slack.post`, `EmailService.send` with injectable `FailureConfig` failure toggle.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of shared IR detector, mock API, executor, logs, API routes, UI, and end-to-end tests.
+Implementation of template resolver (Task 4.3), condition evaluator, sequential executor, logs, API run routes, UI, and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -120,17 +120,18 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 6. Build executor before UI polish.
 7. Centralized MongoDB operations inside strongly typed `persistence/` repositories using `Filter<Document>` to keep raw queries out of routes and services.
 8. Version safety: compare baseVersion on every edit, reject conflicts, and enforce draft versions to never overwrite published ones.
+9. MockFormsAdapter injects failure via `FailureConfig.failOn` (function/operation name string). No UI, no env var — pure in-process injection for tests and demo code.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Implement detector, mock API, executor, and logs (Task 4/5).
+1. Implement template resolver, condition evaluator, and sequential executor (Tasks 4.3–4.5).
 2. Connect React Flow UI.
 3. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, and Forms API adapter tests. The 8 new adapter tests (formsAdapter.test.ts) pass without a database connection. All non-DB tests pass. MongoDB-dependent tests (persistence, routes, versionService, db) require a live Atlas connection; they pass in CI but timeout locally without one. Total passing when DB is connected: 48 tests.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), and local mock adapter tests (17). All non-DB tests pass (25 total without DB). MongoDB-dependent tests (persistence, routes, versionService, db) require a live Atlas connection; they pass in CI but timeout locally without one. Total passing when DB is connected: 65 tests.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -233,7 +234,7 @@ The visual architecture data flow diagram mapping components, folders, and data 
 ---
 
 **Prepared by:** Antigravity AI  
-**Status:** Task 4.1 Completed  
+**Status:** Task 4.2 Completed  
 **Last updated:** 2026-08-22
 
 ## Task 4.1 — Forms API Adapter (Completed)
@@ -273,8 +274,82 @@ None. The adapter pattern was straightforward. Existing types in `shared/ir.ts` 
 ### Current Project Status
 Executor integration boundary is defined. The executor can now be written to depend on `IFormsAdapter` without coupling to any real HTTP client. The local mock API (Task 4.2) will implement this interface.
 
+---
+
+## Task 4.2 — Local Mock Forms API (Completed)
+
+### Files Created
+- `mock-forms-api/mockFormsAdapter.ts` — deterministic `IFormsAdapter` implementation
+- `tests/mockFormsAdapter.test.ts` — 17 unit tests (no DB or network required)
+
+### What Was Implemented
+`MockFormsAdapter` — a concrete class implementing `IFormsAdapter` that:
+- Imports from `executor/formsAdapter.ts` only (never from server or persistence)
+- Is injected through the `IFormsAdapter` interface; the executor sees only the interface
+- Returns hardcoded, constant responses for all known function names
+- Provides a deterministic fallback for any unknown function name
+
+### Operations Implemented
+
+Seeded workflow analysis:
+- **OrderPlaced**: uses `FraudService.check`, `Slack.post`, `EmailService.send` (all via `function`)
+- **AssetRequestApproval**: uses `Slack.post` (×3), `EmailService.send` (×1) (all via `function`)
+
+No seeded workflow uses `formCreate`, `formUpdate`, `formDelete`, or `operation` directly —
+those are implemented as pass-through stubs to fully satisfy `IFormsAdapter`.
+
+| Method | Action name | Implemented |
+|--------|------------|-------------|
+| `function` | `FraudService.check` | ✅ deterministic response: `{ score: 0.05, approved: true, riskLevel: "low" }` |
+| `function` | `Slack.post` | ✅ deterministic response: `{ ok: true, channel: "mock-channel", ts: "1000000000.000000" }` |
+| `function` | `EmailService.send` | ✅ deterministic response: `{ accepted: true, messageId: "mock-msg-001" }` |
+| `function` | *(any unknown)* | ✅ fallback response: `{ ok: true }` |
+| `operation` | *(any)* | ✅ stub: `{ ok: true, operation: name }` |
+| `formCreate` | *(any)* | ✅ stub: `{ id, formId, created: true }` |
+| `formUpdate` | *(any)* | ✅ stub: `{ id, formId, updated: true }` |
+| `formDelete` | *(any)* | ✅ stub: `{ id, formId, deleted: true }` |
+
+### Failure Mechanism
+`FailureConfig` is injected at construction time:
+```ts
+const adapter = new MockFormsAdapter({ failOn: 'FraudService.check' });
+```
+- When `failOn` matches the `name` of a `function` or `operation` call, the method returns `normalizeError('MOCK_FAILURE', ...)`.
+- When `failOn` matches the `formId` of a form method call, that method fails.
+- All other calls succeed normally.
+- Default (no `failOn`) → all calls succeed.
+- Fully deterministic: same `failOn` + same input → same error output every time.
+
+### Tests Performed
+| # | Test | Result |
+|---|------|--------|
+| 1 | Same input → same output (determinism) | ✅ PASS |
+| 2 | FraudService.check, Slack.post, EmailService.send succeed in normal mode | ✅ PASS |
+| 3 | Configured function fails when failOn matches | ✅ PASS |
+| 3b | Other functions still succeed when failOn targets a different one | ✅ PASS |
+| 4 | Failed call returns normalized AdapterError with code/message | ✅ PASS |
+| 5 | MockFormsAdapter injectable through IFormsAdapter interface | ✅ PASS |
+| 5b | All five interface methods present and callable | ✅ PASS |
+| 6 | Task 4.1 normalizeSuccess/normalizeError helpers still correct | ✅ PASS |
+| + | formCreate/formUpdate/formDelete/operation stubs pass | ✅ PASS |
+
+Total: 17/17 PASS
+
+### Commands Run
+- `pnpm vitest run tests/mockFormsAdapter.test.ts` → 17/17 PASS
+- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts` → 25/25 PASS
+- `pnpm typecheck` → exit 0, no TypeScript errors
+
+### Problems Encountered
+None. The mock cleanly implements `IFormsAdapter` by importing only from `executor/formsAdapter.ts`. No new dependencies were added.
+
+### Current Project Status
+Integration boundary (Task 4.1) and deterministic local mock (Task 4.2) are complete.
+The executor can now be built to call `IFormsAdapter` methods and have them answered
+by `MockFormsAdapter` without any network or database access.
+
 ### Recommended Next Step
-**Task 4.2 — Create local mock API**: implement `IFormsAdapter` against the `mock-forms-api` Express server so the executor can call deterministic responses during development and demos.
+**Task 4.3 — Build template resolver**: implement `{{trigger.x}}` and `{{stepId.x}}` context resolution so the executor can substitute runtime values into node inputs before calling the adapter.
 
 ## References
 
