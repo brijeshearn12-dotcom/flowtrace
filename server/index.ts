@@ -2,6 +2,7 @@ import express from 'express';
 import { connectDB } from './db';
 import workflowsRouter from './routes/workflows';
 import runsRouter from './routes/runs';
+import detectRouter from './routes/detect';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -9,6 +10,7 @@ const port = process.env.PORT || 3001;
 app.use(express.json());
 app.use('/api/workflows', workflowsRouter);
 app.use('/api/runs', runsRouter);
+app.use('/api/detect', detectRouter);
 
 app.get('/health', async (_req, res) => {
   try {
