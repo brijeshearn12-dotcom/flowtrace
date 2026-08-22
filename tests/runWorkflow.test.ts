@@ -4,27 +4,34 @@ import { COLLECTIONS, RunRepository, WorkflowRepository, VersionRepository, Audi
 import { runWorkflow } from '../executor/runWorkflow';
 import { MockFormsAdapter } from '../mock-forms-api/mockFormsAdapter';
 import { seedOrderPlaced } from '../seed/orderPlaced';
-import { ValidationError } from '../server/services/versionService';
-import { IFormsAdapter } from '../executor/formsAdapter';
+import {
+  IFormsAdapter,
+  FormCreateInput,
+  FormUpdateInput,
+  FormDeleteInput,
+  OperationInput,
+  FunctionInput
+} from '../executor/formsAdapter';
 
 describe('runWorkflow Sequential Executor Tests', () => {
   let isDbAvailable = false;
 
   beforeAll(async () => {
     // Attempt database connection with a 1000ms timeout to prevent test hook timeout
-    const connectWithTimeout = new Promise<void>(async (resolve, reject) => {
+    const connectWithTimeout = new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error('Connection timed out'));
       }, 1000);
 
-      try {
-        await connectDB();
-        clearTimeout(timer);
-        resolve();
-      } catch (err) {
-        clearTimeout(timer);
-        reject(err);
-      }
+      connectDB()
+        .then(() => {
+          clearTimeout(timer);
+          resolve();
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
     });
 
     try {
@@ -280,11 +287,11 @@ describe('runWorkflow Sequential Executor Tests', () => {
 
     // Create a custom adapter implementing IFormsAdapter wrapping the mockAdapter
     const customAdapter: IFormsAdapter = {
-      formCreate: (input: any) => mockAdapter.formCreate(input),
-      formUpdate: (input: any) => mockAdapter.formUpdate(input),
-      formDelete: (input: any) => mockAdapter.formDelete(input),
-      operation: (input: any) => mockAdapter.operation(input),
-      function: async (input: any) => {
+      formCreate: (input: FormCreateInput) => mockAdapter.formCreate(input),
+      formUpdate: (input: FormUpdateInput) => mockAdapter.formUpdate(input),
+      formDelete: (input: FormDeleteInput) => mockAdapter.formDelete(input),
+      operation: (input: OperationInput) => mockAdapter.operation(input),
+      function: async (input: FunctionInput) => {
         if (
           input.name === 'Slack.post' &&
           input.inputs.message &&

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { detectWorkflow } from '../detector';
+import { detectWorkflow, DetectionResult } from '../detector';
 import { Server } from 'http';
 import express from 'express';
 import detectRouter from '../server/routes/detect';
@@ -77,7 +77,7 @@ describe('Detector Route API Integration Tests', () => {
     });
 
     expect(res.status).toBe(200);
-    const data = (await res.json()) as any;
+    const data = (await res.json()) as DetectionResult;
     expect(data.success).toBe(true);
     expect(data.confidence).toBe(0.95);
     expect(data.workflow.id).toBe('wf_order_placed');

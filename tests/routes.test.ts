@@ -16,19 +16,20 @@ describe('Workflow Route API Integration Tests', () => {
 
   beforeAll(async () => {
     // Attempt database connection with a 1000ms timeout to prevent test hook timeout
-    const connectWithTimeout = new Promise<void>(async (resolve, reject) => {
+    const connectWithTimeout = new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error('Connection timed out'));
       }, 1000);
 
-      try {
-        await connectDB();
-        clearTimeout(timer);
-        resolve();
-      } catch (err) {
-        clearTimeout(timer);
-        reject(err);
-      }
+      connectDB()
+        .then(() => {
+          clearTimeout(timer);
+          resolve();
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
     });
 
     try {
@@ -212,7 +213,7 @@ describe('Workflow Route API Integration Tests', () => {
         workflowId: string;
         status: string;
         triggerPayload: Record<string, unknown>;
-        results: Record<string, any>;
+        results: Record<string, unknown>;
       };
     };
 
@@ -230,7 +231,7 @@ describe('Workflow Route API Integration Tests', () => {
     const statusData = (await statusRes.json()) as {
       id: string;
       status: string;
-      results: Record<string, any>;
+      results: Record<string, { status: string }>;
     };
     expect(statusData.id).toBe(runId);
     expect(statusData.status).toBe('success');

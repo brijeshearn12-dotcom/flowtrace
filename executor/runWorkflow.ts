@@ -5,30 +5,37 @@ import {
   AuditEventRepository,
   RunDocument
 } from '../persistence';
-import { Node, Edge, StepResult, RunStatus, StepStatus } from '../shared/ir';
+import { StepResult, RunStatus } from '../shared/ir';
 import { validateWorkflow } from '../shared/validator';
 import { ValidationError } from '../server/services/versionService';
 import { IFormsAdapter } from './formsAdapter';
 import { buildContext, addStepResult, resolveInputs } from './templateResolver';
 import { evaluateOptional } from './conditionEvaluator';
 
+interface TriggerSchema {
+  type?: string;
+  required?: string[];
+  properties?: Record<string, { type?: string; title?: string }>;
+}
+
 /**
  * Validates the trigger payload against the JSON Schema defined in the trigger.
  * Throws an error if required properties are missing or types mismatch.
  */
-export function validateTriggerPayload(schema: any, payload: Record<string, unknown>): void {
+export function validateTriggerPayload(schema: unknown, payload: Record<string, unknown>): void {
   if (!schema) return;
   
-  if (schema.type === 'object') {
-    const required = schema.required || [];
+  const typedSchema = schema as TriggerSchema;
+  if (typedSchema.type === 'object') {
+    const required = typedSchema.required || [];
     for (const key of required) {
       if (payload[key] === undefined || payload[key] === null) {
         throw new Error(`Trigger payload validation failed: missing required property "${key}"`);
       }
     }
     
-    const properties = schema.properties || {};
-    for (const [key, prop] of Object.entries<any>(properties)) {
+    const properties = typedSchema.properties || {};
+    for (const [key, prop] of Object.entries(properties)) {
       const val = payload[key];
       if (val !== undefined && val !== null) {
         if (prop.type === 'string' && typeof val !== 'string') {
@@ -102,7 +109,7 @@ export async function runWorkflow(
   validateTriggerPayload(versionDoc.trigger.schema, triggerPayload);
 
   // 4. Create run in DB
-  let runDoc = await RunRepository.create({
+  const runDoc = await RunRepository.create({
     workflowId: versionDoc.workflowId,
     workflowVersionId: versionDoc.id,
     version: versionDoc.version,
@@ -242,12 +249,13 @@ export async function runWorkflow(
     let resolvedInputs: Record<string, unknown>;
     try {
       resolvedInputs = resolveInputs(node.inputs, execCtx);
-    } catch (err: any) {
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
       const nowStr = new Date().toISOString();
       const stepRes: StepResult = {
         stepId: nodeId,
         status: 'failed',
-        error: `Input resolution failed: ${err.message}`,
+        error: `Input resolution failed: ${errMsg}`,
         startedAt: nowStr,
         completedAt: nowStr,
       };

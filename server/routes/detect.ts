@@ -15,8 +15,9 @@ router.post('/', async (req: Request, res: Response) => {
     try {
       const result = detectWorkflow(String(requirement));
       return res.json(result);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      return res.status(400).json({ error: errMsg });
     }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

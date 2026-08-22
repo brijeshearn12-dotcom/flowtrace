@@ -111,6 +111,7 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 - Fixed catch parameter typed as `any` in `tests/db.test.ts` to pass strict linting rules.
 - Fixed Vitest test concurrency database cleanup issues by configuring single-threaded/sequential file execution in `package.json` scripts.
 - Implemented robust fast-timeout (1s) in runWorkflow database tests to prevent hook timeout when database is unreachable.
+- Fixed 21 ESLint compiler warnings and errors across backend and test files (unused variables, async promise executors in connection helper hooks, prefer-const variables, and explicit any type casts).
 
 ## Important Decisions
 1. Sequential execution for MVP.

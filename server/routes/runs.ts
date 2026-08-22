@@ -40,7 +40,7 @@ router.get('/:runId/logs', async (req: Request, res: Response) => {
       message: string;
       stepId?: string;
       type: string;
-      [key: string]: any;
+      [key: string]: unknown;
     }> = [];
 
     // 1. Run start log

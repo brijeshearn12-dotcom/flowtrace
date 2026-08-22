@@ -172,7 +172,6 @@ export function detectWorkflow(requirement: string): DetectionResult {
   }
 
   let workflowId = 'wf_detected_draft';
-  let workflowName = 'Detected Draft Workflow';
   let trigger: Trigger = { id: 'tr_manual', type: 'manual' };
   let nodes: Node[] = [];
   let edges: Edge[] = [];
@@ -198,7 +197,6 @@ export function detectWorkflow(requirement: string): DetectionResult {
 
   if (isOrderPlaced) {
     workflowId = 'wf_order_placed';
-    workflowName = 'Order Placed Process';
     trigger = ORDER_PLACED_TRIGGER;
     nodes = ORDER_PLACED_NODES;
     edges = ORDER_PLACED_EDGES;
@@ -206,7 +204,6 @@ export function detectWorkflow(requirement: string): DetectionResult {
     explanation = 'Detected OrderPlaced trigger, FraudCheck check step, invoice Slack post, customer confirmation email, and warehouse fulfillment alert.';
   } else if (isAssetRequest) {
     workflowId = 'wf_asset_request_approval';
-    workflowName = 'Asset Request Approval Process';
     trigger = ASSET_REQUEST_TRIGGER;
     nodes = ASSET_REQUEST_NODES;
     edges = ASSET_REQUEST_EDGES;
