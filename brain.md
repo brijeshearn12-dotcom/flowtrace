@@ -96,13 +96,13 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), and Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`) — deterministic `IFormsAdapter` implementation covering `FraudService.check`, `Slack.post`, `EmailService.send` with injectable `FailureConfig` failure toggle.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), and Task 4.3 Template Resolver (`executor/templateResolver.ts`) — resolves `{{trigger.x}}` and `{{nodeId.x}}` references with nested dot-path support, type-preserving resolution, immutable context, and `TemplateResolutionError` on missing paths.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of template resolver (Task 4.3), condition evaluator, sequential executor, logs, API run routes, UI, and end-to-end tests.
+Implementation of condition evaluator (Task 4.4), sequential executor (Task 4.5), run API routes, UI, and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -121,17 +121,18 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 7. Centralized MongoDB operations inside strongly typed `persistence/` repositories using `Filter<Document>` to keep raw queries out of routes and services.
 8. Version safety: compare baseVersion on every edit, reject conflicts, and enforce draft versions to never overwrite published ones.
 9. MockFormsAdapter injects failure via `FailureConfig.failOn` (function/operation name string). No UI, no env var — pure in-process injection for tests and demo code.
+10. Template step references use `{{nodeId.field}}` (not `{{steps.nodeId.field}}`), matching the existing FlowTrace IR convention defined in `shared/validator.ts` and `shared/ir.ts`.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Implement template resolver, condition evaluator, and sequential executor (Tasks 4.3–4.5).
+1. Implement condition evaluator and sequential executor (Tasks 4.4–4.5).
 2. Connect React Flow UI.
 3. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), and local mock adapter tests (17). All non-DB tests pass (25 total without DB). MongoDB-dependent tests (persistence, routes, versionService, db) require a live Atlas connection; they pass in CI but timeout locally without one. Total passing when DB is connected: 65 tests.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), and template resolver tests (31). All non-DB tests pass (56 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 96 tests.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -350,6 +351,119 @@ by `MockFormsAdapter` without any network or database access.
 
 ### Recommended Next Step
 **Task 4.3 — Build template resolver**: implement `{{trigger.x}}` and `{{stepId.x}}` context resolution so the executor can substitute runtime values into node inputs before calling the adapter.
+
+---
+
+## Task 4.3 — Template Resolver (Completed)
+
+### Files Created
+- `executor/templateResolver.ts` — template resolution engine
+- `tests/templateResolver.test.ts` — 31 unit tests (no DB or network)
+
+### What Was Implemented
+
+`ExecutionContext` — runtime data structure:
+```ts
+interface ExecutionContext {
+  trigger: Record<string, unknown>;   // original trigger payload
+  steps:   Record<string, unknown>;   // nodeId → step output
+}
+```
+
+`buildContext(triggerPayload)` — creates a fresh context at run start.
+
+`addStepResult(ctx, stepResult)` — returns a new (non-mutating) context with the step's output added.
+
+`resolveString(value, ctx)` — resolves all `{{...}}` tokens in a string:
+- **Mode A** (whole value is one token): returns the resolved value preserving its original type (number, boolean, etc.)
+- **Mode B** (embedded in larger string): stringifies resolved values and substitutes in place.
+
+`resolveInputs(inputs, ctx)` — resolves all string values in a `Record<string, unknown>`; non-strings pass through unchanged; original object is never mutated.
+
+`resolveConditionField(field, ctx)` — resolves a condition `field` string (used by the condition evaluator in the next task).
+
+`TemplateResolutionError` — typed error class with:
+- `code: 'TEMPLATE_REFERENCE_NOT_FOUND'`
+- `reference: string` — the raw `{{...}}` token that failed
+- `message` — human-readable description including the missing path
+
+### Template Syntax Supported
+
+Matches the **existing FlowTrace IR convention** (same regex as `shared/validator.ts`):
+
+| Syntax | Resolves from |
+|--------|--------------|
+| `{{trigger.orderId}}` | `ctx.trigger.orderId` |
+| `{{trigger.customer.email}}` | `ctx.trigger.customer.email` (nested) |
+| `{{order-created.score}}` | `ctx.steps['order-created'].score` |
+| `{{nodeId.nested.path}}` | `ctx.steps[nodeId].nested.path` |
+
+Step references use the **node ID directly** (e.g. `order-created`), matching the validator's convention where the namespace is either `trigger` or a node ID — NOT a `steps.` prefix.
+
+### Runtime Context Structure
+```ts
+{
+  trigger: { orderId: 'ORD-101', total: 500, ... },
+  steps: {
+    'order-created': { score: 0.05, approved: true },
+    'invoice':       { ok: true, ts: '...' }
+  }
+}
+```
+
+### Missing Reference Behavior
+Any missing path throws `TemplateResolutionError` immediately with:
+- `code: 'TEMPLATE_REFERENCE_NOT_FOUND'`
+- The exact `{{token}}` in `reference`
+- A message naming the missing namespace and path
+
+Never returns `undefined` silently. No fallback values.
+
+### Security
+- No `eval()`, no `new Function()`, no dynamic code execution
+- Pure property-walk using `Object.prototype.hasOwnProperty` checks
+- Templates can only access data explicitly passed in `ExecutionContext`
+- Prototype chain is never traversed
+
+### Tests Performed
+| # | Test | Result |
+|---|------|--------|
+| 1 | Trigger reference `{{trigger.orderId}}` → `'ORD-101'` | ✅ PASS |
+| 2 | Nested trigger `{{trigger.customer.email}}` | ✅ PASS |
+| 3 | Step reference `{{order-created.formId}}` → `'FORM-123'` | ✅ PASS |
+| 4 | Multiple refs in `resolveInputs` + embedded strings | ✅ PASS |
+| 5 | Missing trigger path → `TemplateResolutionError` | ✅ PASS |
+| 6 | Missing step path → `TemplateResolutionError` | ✅ PASS |
+| 7 | Static values unchanged, no mutation | ✅ PASS |
+| 8 | Task 4.1 + 4.2 adapter tests still pass | ✅ PASS |
+| + | buildContext, addStepResult, resolveConditionField | ✅ PASS |
+
+Total: 31/31 PASS (56/56 across Tasks 4.1 + 4.2 + 4.3 combined)
+
+### Commands Run
+- `pnpm vitest run tests/templateResolver.test.ts` → 31/31 PASS
+- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts` → 56/56 PASS
+- `pnpm typecheck` → exit 0, no TypeScript errors
+
+### Problems Encountered
+None. The existing IR convention (`{{nodeId.field}}`, not `{{steps.nodeId.field}}`) was confirmed from `shared/validator.ts` line 163 and `shared/ir.ts` comments. Implementation matched the existing syntax exactly.
+
+### Current Project Status
+Three executor building blocks are complete:
+1. **Task 4.1** — `IFormsAdapter` integration boundary
+2. **Task 4.2** — `MockFormsAdapter` deterministic mock
+3. **Task 4.3** — `templateResolver` — resolves `{{trigger.x}}` and `{{nodeId.x}}`
+
+The executor can now: resolve inputs before each step, distinguish trigger from step references, handle nested paths, and fail predictably on missing references.
+
+### Recommended Next Step
+**Continue Task 4** — next executor/detector implementation from the FlowTrace Hackathon Playbook. The natural next piece is the condition evaluator (`executor/conditionEvaluator.ts`) — evaluating `eq`, `neq`, `gt` conditions using resolved values, followed by the sequential executor itself.
+
+---
+
+**Prepared by:** Antigravity AI  
+**Status:** Task 4.3 Completed  
+**Last updated:** 2026-08-22
 
 ## References
 
