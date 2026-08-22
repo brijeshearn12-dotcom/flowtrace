@@ -93,16 +93,16 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 `MONGODB_URI`, `MONGODB_DB`, `SERVER_PORT`, `CLIENT_URL`, `FORMS_API_BASE_URL`, `FORMS_API_TOKEN`, `LLM_ENABLED`, `LLM_MODEL`, and `LOG_LEVEL`. Never commit real secrets.
 
 ## Current Development Status
-Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
+Baseline toolchain and package structure initialized.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), and Task on **Deterministic Requirement Detector** (`detector/index.ts` & `POST /api/detect`) — deterministically detects Order Placed and Asset Request requirements from plain English text, maps them to allowlisted IR templates, returns confidence/warnings, runs validator on generated IR drafts, and returns basic blank templates for unsupported inputs safely.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), and Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`) — lists saved workflows with status, name, ID, and latest version numbers from the real API database, including loading spinners, connection error indicators, retry functionality, and interactive click selection.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of UI (React Flow DAG, forms, runs view) and end-to-end tests.
+Implementation of detection composer (Task 5.3), React Flow DAG canvas (Task 5.4), UI panels, and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -129,16 +129,19 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 13. Redirect/Recovery Topology: Standalone redirect/handler nodes (topological roots with `inDegree === 0` that function as fallback redirect targets) are excluded from the initial execution queue so they only execute when explicitly triggered by a `redirect` failure policy.
 14. Log Construction on the Fly: The execution-log endpoint generates rich system and step log records by merging the executed run details with the corresponding workflow definition version, including latency, inputs, outputs, conditions, and error details.
 15. Deterministic Requirement Detection: Plain English requirements are matched against known patterns using keywords mapping to allowlisted functions and operators. Output drafts are verified using the canonical validator (`validateWorkflow`) before being returned with confidence and warnings.
+16. Restrained UI System Tokens: Colors, accessibility standards, spacing increments of 4px, border-radii, shadows, and semantic status badge rules are isolated as CSS variables in a central stylesheet to avoid localized style pollution.
+17. API Client Proxies: Configured Vite server proxy rule routing all `/api/*` frontend calls directly to the local backend port `3001` dynamically, allowing standard relative requests.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Build Frontend UI (React Flow DAG visualization, triggers, and runs panel).
-2. Rehearse deterministic demo.
+1. Build Detection Composer (Task 5.3).
+2. Connect React Flow UI.
+3. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), and requirement detector tests (7). All non-DB tests pass (91 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 136 tests.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), and requirement detector tests (7). All non-DB tests pass (91 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 136 tests. Client builds successfully (`vite build client` completed in 842ms).
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -616,43 +619,50 @@ All core backend engine and API layers are now complete:
 5. `runWorkflow` sequential topological execution loop (`runWorkflow.ts`)
 6. Run & execution-log REST API routes (`server/routes/runs.ts`, `server/routes/workflows.ts`, and `server/index.ts`)
 7. Deterministic Requirement Detector (`detector/index.ts` and `server/routes/detect.ts`)
+8. Design Tokens for UI styling (`client/styles/tokens.css` and `client/styles/UI_SYSTEM.md`)
+9. Workflow List dashboard page (`client/pages/WorkflowHome.tsx` and main app navigation)
 
 ### Recommended Next Step
-**Frontend Development**: connect the backend REST API endpoints (`/api/detect`, `/api/workflows`, and `/api/runs`) to a React + React Flow frontend to visualize the DAG, trigger runs, and display execution logs.
+**Task 5 Step 3 — Build detection composer**: create the interactive natural-language detector component at `client/components/DetectionComposer.tsx` to let users type text requirements, request IR drafts from the API, and preview status/warnings.
 
 ---
 
 **Prepared by:** Antigravity AI  
-**Status:** Requirement Detector Completed  
+**Status:** Task 5 Step 2 Completed  
 **Last updated:** 2026-08-22
 
-## Task — Deterministic Requirement Detector (Completed)
+## Task 5 Step 1 — Create Design Tokens (Completed)
 
 ### Files Created/Modified
-- `detector/index.ts` — Deterministic detector utilizing pattern keyword mapping to produce valid draft IRs using canonical schemas
-- `server/routes/detect.ts` — Exposes POST /api/detect endpoint
-- `server/index.ts` — Mounted detect router under `/api/detect`
-- `tests/detector.test.ts` — Unit and route integration test suite covering requirement matching, warnings, blank template fallback, and validation errors
+- `client/styles/tokens.css` — Centralized style tokens (colors, accessible status variables, spacing, radius, fonts) and base/utility classes
+- `client/styles/UI_SYSTEM.md` — Design system reference document explaining classes and variables
 
 ### What Was Implemented
-- **Deterministic Pattern Matching**: Matches input text against Order Placed and Asset Request requirements using allowlisted metadata keywords.
-- **Workflow IR Generation**: Generates full, valid drafts conforming to schemas and invariants defined in `shared/schemas.ts`.
-- **Pre-return Validation**: Validates generated draft IR configurations using the canonical validator (`validateWorkflow`) before returning them. Any validation issues are appended to the `warnings` array.
-- **Safe Fallback**: If input requirement doesn't match allowlisted patterns, returns `success: false`, confidence `0`, and a warning alongside a basic blank workflow template (`wf_detected_draft`).
-- **Input Validation**: Rejects empty or too short requirement inputs with `400 Bad Request` and `error` detail message.
+- **Accessible Color Palette**: Isolated primary background, borders, text colors, and brand indigo color.
+- **High-contrast Status Rules**: Isolated colors for `success`, `warning` (skipped), `error` (failed), and `running` states.
+- **Typography & Spacing**: Enforced system sans font stack, uniform font scales, and spacing intervals based on `4px` grid (`var(--spacing-1)` through `var(--spacing-12)`).
+- **Utility Classes**: Styled hoverable `.ft-card` container, `.ft-btn` buttons, and status-colored `.ft-badge` indicators.
 
-### Tests Performed
-- **Unit Test 1**: Verifies correct detection and generated IR details for Order Placed requirement pattern.
-- **Unit Test 2**: Verifies correct detection and generated IR details for Asset Request requirement pattern.
-- **Unit Test 3**: Verifies safe fallback with warning and blank draft for unrelated requirement.
-- **Unit Test 4**: Verifies empty/short inputs throw expected validation error.
-- **API Test 1**: Fires `POST /api/detect` with order requirement and asserts `200 OK` and valid draft structures.
-- **API Test 2-3**: Fires `POST /api/detect` with empty/short bodies and asserts `400 Bad Request`.
+---
 
-### Test Results
-- `pnpm vitest run tests/detector.test.ts` → **7/7 PASS**
-- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts tests/conditionEvaluator.test.ts tests/runWorkflow.test.ts tests/routes.test.ts tests/detector.test.ts` → **100/100 PASS**
-- `pnpm typecheck` → exit 0, no compilation errors
+## Task 5 Step 2 — Build Workflow List (Completed)
+
+### Files Created/Modified
+- `client/pages/WorkflowHome.tsx` — Dashboard component showing list of workflows from the `/api/workflows` API
+- `client/src/main.tsx` — Configured main state management routing to WorkflowHome dashboard or active selected workflow views
+- `client/vite.config.ts` — Added server proxy mapping `/api/*` requests to the local backend port `3001`
+
+### What Was Implemented
+- **Dynamic API Listing**: Fetches workflows from the backend dynamically and loops through elements.
+- **Interactive Workflow Cards**: Renders title, status badge, version info, and ID, calling selected callback on user click.
+- **Loading & Error Handles**: Renders clean Loading screens, empty draft fallbacks, and connection error alerts with connection Retry action triggers.
+- **Consumed Design Tokens**: Styled page layouts and elements using utility classes and variables from `tokens.css`.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint constraints met**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 842ms**
+- `pnpm typecheck` → **exit 0, all compiler checks passing**
+- `pnpm vitest run` → **100/100 tests passed successfully**
 
 ## References
 

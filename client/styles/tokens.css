@@ -1,0 +1,172 @@
+/* FlowTrace Design Tokens */
+:root {
+  /* Colors */
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f1f5f9;
+  
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
+  
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  
+  /* Brand Colors */
+  --color-brand: #4f46e5;       /* Primary Indigo */
+  --color-brand-hover: #4338ca;
+  --color-brand-light: #e0e7ff;
+  
+  /* Status Colors (Accessible Contrast) */
+  --color-success: #15803d;      /* Forest Green */
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
+  
+  --color-warning: #b45309;      /* Dark Amber */
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fde68a;
+  
+  --color-error: #b91c1c;        /* Strong Red */
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fca5a5;
+
+  --color-running: #0369a1;      /* Ocean Blue */
+  --color-running-bg: #f0f9ff;
+  --color-running-border: #bae6fd;
+  
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  --font-size-xs: 0.75rem;       /* 12px */
+  --font-size-sm: 0.875rem;      /* 14px */
+  --font-size-base: 1rem;        /* 16px */
+  --font-size-lg: 1.125rem;      /* 18px */
+  --font-size-xl: 1.25rem;       /* 20px */
+  --font-size-xxl: 1.5rem;       /* 24px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  
+  /* Spacing */
+  --spacing-1: 0.25rem;          /* 4px */
+  --spacing-2: 0.5rem;           /* 8px */
+  --spacing-3: 0.75rem;          /* 12px */
+  --spacing-4: 1rem;             /* 16px */
+  --spacing-5: 1.25rem;          /* 20px */
+  --spacing-6: 1.5rem;           /* 24px */
+  --spacing-8: 2rem;             /* 32px */
+  --spacing-12: 3rem;            /* 48px */
+  
+  /* Border Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Base Styles using Tokens */
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utility Card and Button Styles */
+.ft-card {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ft-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.ft-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ft-btn-primary {
+  background-color: var(--color-brand);
+  color: white;
+}
+
+.ft-btn-primary:hover {
+  background-color: var(--color-brand-hover);
+}
+
+.ft-btn-secondary {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.ft-btn-secondary:hover {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-hover);
+}
+
+/* Status Badges */
+.ft-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ft-badge-success {
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success);
+}
+
+.ft-badge-warning {
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning);
+}
+
+.ft-badge-error {
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
+}
+
+.ft-badge-running {
+  background-color: var(--color-running-bg);
+  border: 1px solid var(--color-running-border);
+  color: var(--color-running);
+}
