@@ -149,6 +149,14 @@ export async function runWorkflow(
     }
   }
 
+  // Find redirect targets to exclude them from the initial root queue
+  const redirectTargets = new Set<string>();
+  for (const n of nodes) {
+    if (n.failurePolicy?.action === 'redirect' && n.failurePolicy.redirectTargetId) {
+      redirectTargets.add(n.failurePolicy.redirectTargetId);
+    }
+  }
+
   // Find root nodes (in-degree === 0)
   const queue: string[] = [];
   const resolvedParentsCount = new Map<string, number>();
@@ -158,7 +166,7 @@ export async function runWorkflow(
     resolvedParentsCount.set(node.id, 0);
     activeIncomingPaths.set(node.id, false);
     
-    if (inDegree.get(node.id) === 0) {
+    if (inDegree.get(node.id) === 0 && !redirectTargets.has(node.id)) {
       queue.push(node.id);
       activeIncomingPaths.set(node.id, true); // Root nodes are always reachable
     }
@@ -292,22 +300,86 @@ export async function runWorkflow(
       }
     } else {
       // Step failed
-      const stepRes: StepResult = {
-        stepId: nodeId,
-        status: 'failed',
-        error: adapterResult.message,
-        startedAt,
-        completedAt,
-      };
-      results[nodeId] = stepRes;
-      runStatus = 'failed';
-      
-      await RunRepository.update(runDoc.id, {
-        results,
-        status: runStatus,
-        completedAt,
-      });
-      break; // Abort execution loop
+      const policy = node.failurePolicy?.action || 'abort';
+
+      if (policy === 'skip') {
+        const stepRes: StepResult = {
+          stepId: nodeId,
+          status: 'skipped',
+          error: `Step failed (skipped policy): ${adapterResult.message}`,
+          startedAt,
+          completedAt,
+        };
+        results[nodeId] = stepRes;
+
+        // Persist step result
+        await RunRepository.update(runDoc.id, { results });
+
+        // Process outgoing edges to continue execution (same as success path but without adding to execCtx)
+        const children = adjList.get(nodeId) || [];
+        for (const childId of children) {
+          resolvedParentsCount.set(childId, resolvedParentsCount.get(childId)! + 1);
+
+          // Find edge configuration
+          const edge = edges.find(e => e.source === nodeId && e.target === childId)!;
+          const edgeCondResult = evaluateOptional(edge.condition, execCtx);
+
+          if (edgeCondResult.matched) {
+            activeIncomingPaths.set(childId, true);
+          }
+
+          if (resolvedParentsCount.get(childId) === inDegree.get(childId)) {
+            queue.push(childId);
+          }
+        }
+      } else if (policy === 'redirect') {
+        const stepRes: StepResult = {
+          stepId: nodeId,
+          status: 'failed',
+          error: `Step failed (redirected policy): ${adapterResult.message}`,
+          startedAt,
+          completedAt,
+        };
+        results[nodeId] = stepRes;
+
+        const redirectTargetId = node.failurePolicy?.redirectTargetId;
+        if (!redirectTargetId || !nodes.some(n => n.id === redirectTargetId)) {
+          // Fallback to abort if target is invalid
+          runStatus = 'failed';
+          await RunRepository.update(runDoc.id, {
+            results,
+            status: runStatus,
+            completedAt,
+          });
+          break;
+        }
+
+        // Clear current execution queue and insert the redirect target
+        queue.length = 0;
+        activeIncomingPaths.set(redirectTargetId, true);
+        queue.push(redirectTargetId);
+
+        // Persist step result and continue execution loop
+        await RunRepository.update(runDoc.id, { results });
+      } else {
+        // default: abort
+        const stepRes: StepResult = {
+          stepId: nodeId,
+          status: 'failed',
+          error: `Step failed (abort policy): ${adapterResult.message}`,
+          startedAt,
+          completedAt,
+        };
+        results[nodeId] = stepRes;
+        runStatus = 'failed';
+
+        await RunRepository.update(runDoc.id, {
+          results,
+          status: runStatus,
+          completedAt,
+        });
+        break; // Abort execution loop
+      }
     }
   }
 

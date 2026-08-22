@@ -5,6 +5,7 @@ import { runWorkflow } from '../executor/runWorkflow';
 import { MockFormsAdapter } from '../mock-forms-api/mockFormsAdapter';
 import { seedOrderPlaced } from '../seed/orderPlaced';
 import { ValidationError } from '../server/services/versionService';
+import { IFormsAdapter } from '../executor/formsAdapter';
 
 describe('runWorkflow Sequential Executor Tests', () => {
   let isDbAvailable = false;
@@ -203,5 +204,106 @@ describe('runWorkflow Sequential Executor Tests', () => {
     // Verify DB run persistence
     const dbRun = await RunRepository.get(runResult.id);
     expect(dbRun!.status).toBe('failed');
+  });
+
+  it('5. should handle skip failure policy correctly, skipping the step but continuing execution', async () => {
+    if (!isDbAvailable) return;
+
+    // Create version document first
+    const versionDoc = await VersionRepository.create({
+      workflowId: 'wf_skip_test',
+      version: 1,
+      trigger: { id: 'tr_skip', type: 'manual' },
+      nodes: [
+        {
+          id: 'step-fail',
+          name: 'Failing Step with Skip Policy',
+          type: 'action',
+          action: 'Mock.failingAction',
+          inputs: {},
+          failurePolicy: { action: 'skip' }
+        },
+        {
+          id: 'step-success',
+          name: 'Subsequent Successful Step',
+          type: 'action',
+          action: 'Mock.successAction',
+          inputs: {}
+        }
+      ],
+      edges: [
+        { id: 'edge-skip', source: 'step-fail', target: 'step-success' }
+      ]
+    });
+
+    // Create workflow with generated version ID
+    await WorkflowRepository.create({
+      id: 'wf_skip_test',
+      name: 'Skip Policy Test Workflow',
+      status: 'published',
+      latestVersion: 1,
+      publishedVersionId: versionDoc.id,
+    });
+
+    const triggerPayload = {};
+    const mockAdapter = new MockFormsAdapter({
+      failOn: 'Mock.failingAction',
+    });
+
+    const runResult = await runWorkflow('wf_skip_test', triggerPayload, mockAdapter);
+
+    // Skip failure policy should result in a successful run status overall
+    expect(runResult.status).toBe('success');
+    expect(runResult.results['step-fail']).toBeDefined();
+    expect(runResult.results['step-fail'].status).toBe('skipped');
+    expect(runResult.results['step-fail'].error).toContain('Step failed (skipped policy)');
+
+    // Verify the subsequent node ran successfully
+    expect(runResult.results['step-success']).toBeDefined();
+    expect(runResult.results['step-success'].status).toBe('success');
+  });
+
+  it('6. should handle redirect failure policy correctly, jumping to the redirectTargetId node', async () => {
+    if (!isDbAvailable) return;
+
+    const { seedAssetRequestApproval } = await import('../seed/assetRequestApproval');
+    await seedAssetRequestApproval();
+
+    const triggerPayload = {
+      requestId: 'REQ-redirect-777',
+      approved: true,
+      amount: 1200,
+    };
+
+    const mockAdapter = new MockFormsAdapter();
+    const { normalizeError } = await import('../executor/formsAdapter');
+
+    // Create a custom adapter implementing IFormsAdapter wrapping the mockAdapter
+    const customAdapter: IFormsAdapter = {
+      formCreate: (input: any) => mockAdapter.formCreate(input),
+      formUpdate: (input: any) => mockAdapter.formUpdate(input),
+      formDelete: (input: any) => mockAdapter.formDelete(input),
+      operation: (input: any) => mockAdapter.operation(input),
+      function: async (input: any) => {
+        if (
+          input.name === 'Slack.post' &&
+          input.inputs.message &&
+          String(input.inputs.message).includes('approved!')
+        ) {
+          return normalizeError('DISPATCH_ERROR', 'Failed to dispatch asset to warehouse');
+        }
+        return mockAdapter.function(input);
+      }
+    };
+
+    const runResult = await runWorkflow('wf_asset_request_approval', triggerPayload, customAdapter);
+
+    // Redirect policy should mark the final status of the run as success if the redirect target runs successfully
+    expect(runResult.status).toBe('success');
+    expect(runResult.results['approval'].status).toBe('success');
+    expect(runResult.results['approved-action'].status).toBe('failed');
+    expect(runResult.results['approved-action'].error).toContain('Step failed (redirected policy)');
+    expect(runResult.results['failure-handler']).toBeDefined();
+    expect(runResult.results['failure-handler'].status).toBe('success');
   });
 });

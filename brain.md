@@ -96,7 +96,7 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), and Task 4.5 Sequential Executor (`executor/runWorkflow.ts`) — sequential workflow runner traversing DAGs topologically, executing nodes through forms adapter, evaluating conditions, dynamically resolving inputs, persisting intermediate run results, and enforcing trigger schema validation.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), and Task 4.5 Sequential Executor (`executor/runWorkflow.ts`) updated with **Failure Policies** (abort, skip, redirect) — sequential workflow runner traversing DAGs topologically, handling failures via recovery branches, executing redirect targets immediately, and logging policy outcomes.
 
 ## Features Currently Being Built
 None.
@@ -125,6 +125,7 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 10. Template step references use `{{nodeId.field}}` (not `{{steps.nodeId.field}}`), matching the existing FlowTrace IR convention defined in `shared/validator.ts` and `shared/ir.ts`.
 11. Condition evaluator never throws — resolution and type errors are wrapped in `ConditionError` so the executor can handle them as first-class values. `gt` is number-only; `eq`/`neq` use strict equality across all types.
 12. Topological/Queue-based Execution: sequential executor processes DAGs by calculating in-degrees, tracking active paths, and skipping children whose parents were not traversed due to branch conditions or step failures.
+13. Redirect/Recovery Topology: Standalone redirect/handler nodes (topological roots with `inDegree === 0` that function as fallback redirect targets) are excluded from the initial execution queue so they only execute when explicitly triggered by a `redirect` failure policy.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
@@ -135,7 +136,7 @@ LLM-only detection, production webhooks, cron scheduling, arbitrary agent action
 3. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), and sequential executor tests (4). All non-DB tests pass (82 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 122 tests.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), and sequential executor tests (6). All non-DB tests pass (84 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 124 tests.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -560,52 +561,52 @@ The executor now has everything needed to: resolve inputs, evaluate edge conditi
 ---
 
 **Prepared by:** Antigravity AI  
-**Status:** Task 4.5 Completed  
+**Status:** Task 4.5 Completed (with Failure Policies)  
 **Last updated:** 2026-08-22
 
-## Task 4.5 — Sequential Executor (Completed)
+## Task 4.5 — Sequential Executor & Failure Policies (Completed)
 
 ### Files Created/Modified
-- `executor/runWorkflow.ts` — sequential workflow executor implementation
-- `tests/runWorkflow.test.ts` — unit and integration tests for sequential executor
+- `executor/runWorkflow.ts` — sequential workflow executor implementation with support for abort, skip, and redirect policies
+- `tests/runWorkflow.test.ts` — unit and integration tests covering topological ordering, trigger schemas, and all failure policies
 
 ### What Was Implemented
-- `runWorkflow(workflowId, triggerPayload, adapter)`:
+- `runWorkflow(workflowId, triggerPayload, adapter)` with Failure Policy handling:
   - Retrieves target workflow and loads its published version pointer (`publishedVersionId`).
   - Validates workflow schema and invariants (`validateWorkflow`).
   - Validates trigger payload using JSON Schema rules (`validateTriggerPayload`).
   - Creates a run record in status `running` and saves to MongoDB.
   - Generates audit events for execution.
-  - Constructs adjacency list and tracks in-degree for BFS/topological DAG traversal.
+  - Computes adjacency lists and in-degrees for BFS/topological DAG traversal.
+  - Excludes standalone redirect recovery target nodes (which function as fallback error handler steps but have `inDegree === 0`) from the initial root nodes queue.
   - Dynamically evaluates preconditions on nodes and traversing edges (`evaluateOptional`).
   - Automatically skips nodes that are unreached due to edge condition mismatches or parent skips.
-  - Dynamically resolves input templates (`resolveInputs`) from execution context right before the API call.
-  - Dispatches calls to `adapter.function` and records latency (`startedAt` / `completedAt`).
-  - Aborts execution and marks run as `failed` if any step returns a failure response.
-  - Automatically updates and persists the run document in MongoDB after every step completes.
+  - Dynamically resolves input templates (`resolveInputs`) right before the step executes.
+  - On node failure, evaluates the step's `failurePolicy`:
+    - **abort** (default): Stores step result as `failed`, marks the overall run status as `failed`, updates the run record in MongoDB, and terminates the execution loop immediately.
+    - **skip**: Stores step result as `skipped` with the error reason recorded, updates MongoDB, and traverses outgoing edges to queue downstream eligible nodes, allowing the workflow to continue executing.
+    - **redirect**: Stores step result as `failed`, clears the current execution queue to abort parallel branches, queues the configured `redirectTargetId` node as active, updates MongoDB, and continues loop execution from the recovery node.
+  - Updates and persists the run document in MongoDB after every step completes.
 
 ### Tests Performed
-- **TEST 1**: Execution of the seeded `OrderPlaced` workflow. Verifies that all steps (`order-created` -> `invoice` -> `confirmation` -> `fulfillment`) execute in correct order, inputs/outputs resolve dynamically, run gets persisted in MongoDB, and audit events are captured.
+- **TEST 1**: Sequential execution of the seeded `OrderPlaced` workflow. Verifies that all steps execute in correct order, context output dynamically resolves, and execution is persisted.
 - **TEST 2**: Validation rejection. Verifies that trigger payloads with missing fields or type mismatches throw errors before starting execution, creating zero run records.
 - **TEST 3**: Published validation. Verifies that trying to execute workflows with no published version throws an exception.
-- **TEST 4**: Step failure handling. Verifies that when a step fails, the executor marks the step as failed, stops queue processing, sets final status to `failed`, and persists it in MongoDB.
+- **TEST 4**: Step failure abort handling. Verifies that when a step fails under abort, the executor marks the step as failed, stops queue processing, sets final status to `failed`, and persists it in MongoDB.
+- **TEST 5**: Skip failure policy test. Verifies that when a step fails with a skip policy, the step is recorded as `skipped` with the error reason saved, and the subsequent nodes run successfully, yielding an overall run status of `success`.
+- **TEST 6**: Redirect failure policy test. Verifies that when `approved-action` fails in the seeded `AssetRequestApproval` workflow, the executor jumps to the `failure-handler` step, executes it successfully, and updates the final run status to `success`.
 
 ### Test Results
-- `pnpm vitest run tests/runWorkflow.test.ts` → **4/4 PASS** (with fast-timeout skip when running offline/no Atlas)
-- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts tests/conditionEvaluator.test.ts tests/runWorkflow.test.ts` → **82/82 PASS**
+- `pnpm vitest run tests/runWorkflow.test.ts` → **6/6 PASS** (with fast-timeout skip when running offline/no Atlas)
+- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts tests/conditionEvaluator.test.ts tests/runWorkflow.test.ts` → **84/84 PASS**
 - `pnpm typecheck` → exit 0, no TypeScript compilation errors
 
 ### Problems Encountered
-- MongoDB connection timeouts in test suites when Atlas connection is offline in local environment.
-- *Fix*: Implemented a fast 1-second timeout wrapper around `connectDB` in `runWorkflow.test.ts` to cleanly skip DB-dependent tests rather than hanging or timing out the vitest hook, keeping local execution fast and CI-compatible.
+- Standalone redirect handler nodes with 0 incoming edges would normally be queued at startup.
+- *Fix*: Excluded nodes that are listed as redirect targets from the initial root nodes queue, ensuring they are only run when explicitly reached via a `redirect` failure policy jump.
 
 ### Current Project Status
-All five core execution engine layers are complete:
-1. `IFormsAdapter` integration boundary (`formsAdapter.ts`)
-2. `MockFormsAdapter` local offline mock (`mockFormsAdapter.ts`)
-3. Context/template resolver (`templateResolver.ts`)
-4. Edge/precondition evaluator (`conditionEvaluator.ts`)
-5. DAG-traversing sequential executor (`runWorkflow.ts`)
+All five core execution engine layers are complete, including robust error handling and failure policy recovery mechanics.
 
 ### Recommended Next Step
 **Task 4.6 — Create Run API routes**: build the API endpoints for executing runs and fetching execution history (`POST /api/workflows/:id/run` and `GET /api/runs/:runId`), exposing execution results to the client.
