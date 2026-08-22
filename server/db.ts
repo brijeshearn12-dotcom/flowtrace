@@ -10,15 +10,24 @@ try {
   // Ignored if .env file is missing or already loaded via CLI
 }
 
-let client: MongoClient | null = null;
-let db: Db | null = null;
+const globalRef = globalThis as unknown as {
+  __mongoClient?: MongoClient | null;
+  __mongoDb?: Db | null;
+};
 
+// Retrieve from global cache if available
+let client: MongoClient | null = globalRef.__mongoClient || null;
+let db: Db | null = globalRef.__mongoDb || null;
 
 /**
  * Initializes and connects to the MongoDB client and database.
  * Reuses the existing connection if already established.
  */
 export async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
+  // Read again from global cache to ensure other modules' connections are detected
+  client = globalRef.__mongoClient || null;
+  db = globalRef.__mongoDb || null;
+
   if (client && db) {
     return { client, db };
   }
@@ -36,9 +45,16 @@ export async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
   try {
     // Create a new MongoClient.
     // Ensure we do not print the URI or credentials in any console output.
-    client = new MongoClient(uri);
-    await client.connect();
-    db = client.db(dbName);
+    const newClient = new MongoClient(uri);
+    await newClient.connect();
+    const newDb = newClient.db(dbName);
+    
+    // Save to global variables and global cache
+    client = newClient;
+    db = newDb;
+    globalRef.__mongoClient = newClient;
+    globalRef.__mongoDb = newDb;
+
     console.log('Successfully connected to MongoDB');
     return { client, db };
   } catch (error) {
@@ -49,6 +65,8 @@ export async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
     console.error('Failed to connect to MongoDB:', safeErrorMessage);
     client = null;
     db = null;
+    globalRef.__mongoClient = null;
+    globalRef.__mongoDb = null;
     throw new Error(`Failed to connect to MongoDB: ${safeErrorMessage}`);
   }
 }
@@ -57,30 +75,35 @@ export async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
  * Returns the active Db instance. Throws if not initialized.
  */
 export function getDb(): Db {
-  if (!db) {
+  const activeDb = db || globalRef.__mongoDb;
+  if (!activeDb) {
     throw new Error('Database not initialized. Call connectDB first.');
   }
-  return db;
+  return activeDb;
 }
 
 /**
  * Returns the active MongoClient instance. Throws if not initialized.
  */
 export function getClient(): MongoClient {
-  if (!client) {
+  const activeClient = client || globalRef.__mongoClient;
+  if (!activeClient) {
     throw new Error('Database client not initialized. Call connectDB first.');
   }
-  return client;
+  return activeClient;
 }
 
 /**
  * Closes the active MongoDB connection.
  */
 export async function closeDB(): Promise<void> {
-  if (client) {
-    await client.close();
+  const activeClient = client || globalRef.__mongoClient;
+  if (activeClient) {
+    await activeClient.close();
     client = null;
     db = null;
+    globalRef.__mongoClient = null;
+    globalRef.__mongoDb = null;
     console.log('MongoDB connection closed');
   }
 }

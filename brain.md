@@ -96,13 +96,13 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), and Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`) — lists saved workflows with status, name, ID, and latest version numbers from the real API database, including loading spinners, connection error indicators, retry functionality, and interactive click selection.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), and Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`) — natural language workflow detector panel containing textareas, preset templates selection, metadata inserts, confidence ratings, warnings display lists, and draft nodes/edges summary views connected to the real `POST /api/detect` endpoint.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of detection composer (Task 5.3), React Flow DAG canvas (Task 5.4), UI panels, and end-to-end tests.
+Implementation of React Flow DAG canvas (Task 5.4), UI panels, and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -131,17 +131,18 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 15. Deterministic Requirement Detection: Plain English requirements are matched against known patterns using keywords mapping to allowlisted functions and operators. Output drafts are verified using the canonical validator (`validateWorkflow`) before being returned with confidence and warnings.
 16. Restrained UI System Tokens: Colors, accessibility standards, spacing increments of 4px, border-radii, shadows, and semantic status badge rules are isolated as CSS variables in a central stylesheet to avoid localized style pollution.
 17. API Client Proxies: Configured Vite server proxy rule routing all `/api/*` frontend calls directly to the local backend port `3001` dynamically, allowing standard relative requests.
+18. Shared Global Connection Pool: Wired database connection state to `globalThis` cache within `server/db.ts` to prevent multiple driver connections or null reference failures when compiling backend route modules via different ESM relative targets.
+19. Strict Sequential Testing: Configured Vitest scripts with `--maxWorkers=1` to run all integration and sequential execution test suites in a single worker process sequentially, preventing race condition conflicts over shared test collections in the MongoDB database.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Build Detection Composer (Task 5.3).
-2. Connect React Flow UI.
-3. Rehearse deterministic demo.
+1. Connect React Flow UI (Task 5.4).
+2. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), and requirement detector tests (7). All non-DB tests pass (91 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 136 tests. Client builds successfully (`vite build client` completed in 842ms).
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), and requirement detector tests (7). All non-DB tests pass (91 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 136 tests. Client builds successfully (`vite build client` completed in 1.01s).
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -663,6 +664,28 @@ All core backend engine and API layers are now complete:
 - `pnpm run build:client` → **Vite client production bundle compiled successfully in 842ms**
 - `pnpm typecheck` → **exit 0, all compiler checks passing**
 - `pnpm vitest run` → **100/100 tests passed successfully**
+
+---
+
+## Task 5 Step 3 — Build Detection Composer (Completed)
+
+### Files Created/Modified
+- `client/components/DetectionComposer.tsx` — Component offering NLP textarea requirements input, preset templates selection, metadata inserts, confidence ratings, warnings display lists, and draft nodes/edges summary views
+- `client/pages/WorkflowHome.tsx` — Mounted DetectionComposer in the dashboard 2-column layout grid
+- `client/src/main.tsx` — Added state management to support previewing NLP-generated active draft details
+- `package.json` — Configured sequential testing settings using `--maxWorkers=1` to prevent database race conditions
+
+### What Was Implemented
+- **Natural Language Parsing Interface**: Offers a text area input connected to `POST /api/detect` for parsing plain English inputs into IR draft structures.
+- **Predefined Presets**: Includes select drop-downs to pre-populate text inputs with the seeded *Order Placed* and *Asset Request Approval* requirements.
+- **Metadata Reference Inserter**: Allows inserting allowlisted metadata items (forms, functions, operators) into the text description.
+- **Execution Draft Cards**: Details generated draft schemas (trigger properties, action steps, conditon nodes, edge lists) and provides confidence badges and validation warnings summaries.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 1.01s**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **100/100 tests pass successfully** (sequential mode prevents DB lock conflicts)
 
 ## References
 

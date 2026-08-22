@@ -4,17 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"pnpm run dev:server\" \"pnpm run dev:client\" \"pnpm run dev:mock\"",
-    "dev:server": "tsx watch server/index.ts",
+    "dev:server": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx watch server/index.ts\"",
     "dev:client": "vite client",
-    "dev:mock": "tsx watch mock-forms-api/index.ts",
+    "dev:mock": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx watch mock-forms-api/index.ts\"",
     "build": "pnpm run build:client && pnpm run build:server",
     "build:client": "vite build client",
     "build:server": "tsc -p server/tsconfig.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
-    "test": "vitest run --fileParallelism=false",
-    "test:watch": "vitest --fileParallelism=false",
-    "seed": "tsx seed/runSeeds.ts"
+    "test": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& vitest run --fileParallelism=false --maxWorkers=1\"",
+    "test:watch": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& vitest --fileParallelism=false --maxWorkers=1\"",
+    "seed": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx seed/runSeeds.ts\""
   },
   "dependencies": {
     "react": "^18.3.1",
