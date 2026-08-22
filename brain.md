@@ -96,13 +96,13 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), and Task 4.3 Template Resolver (`executor/templateResolver.ts`) — resolves `{{trigger.x}}` and `{{nodeId.x}}` references with nested dot-path support, type-preserving resolution, immutable context, and `TemplateResolutionError` on missing paths.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), and Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`) — evaluates `eq`, `neq`, `gt` conditions using resolved runtime values, returns typed ConditionResult with `matched`, `left`, `right`, `operator`, `explanation` (or ConditionError with `code`/`message`), and exposes `evaluateOptional` for unconditional edges.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of condition evaluator (Task 4.4), sequential executor (Task 4.5), run API routes, UI, and end-to-end tests.
+Implementation of sequential executor (Task 4.5), run API routes, UI, and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -122,17 +122,18 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 8. Version safety: compare baseVersion on every edit, reject conflicts, and enforce draft versions to never overwrite published ones.
 9. MockFormsAdapter injects failure via `FailureConfig.failOn` (function/operation name string). No UI, no env var — pure in-process injection for tests and demo code.
 10. Template step references use `{{nodeId.field}}` (not `{{steps.nodeId.field}}`), matching the existing FlowTrace IR convention defined in `shared/validator.ts` and `shared/ir.ts`.
+11. Condition evaluator never throws — resolution and type errors are wrapped in `ConditionError` so the executor can handle them as first-class values. `gt` is number-only; `eq`/`neq` use strict equality across all types.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Implement condition evaluator and sequential executor (Tasks 4.4–4.5).
+1. Implement sequential executor (Task 4.5).
 2. Connect React Flow UI.
 3. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), and template resolver tests (31). All non-DB tests pass (56 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 96 tests.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), and condition evaluator tests (22). All non-DB tests pass (78 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 118 tests.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -462,8 +463,99 @@ The executor can now: resolve inputs before each step, distinguish trigger from 
 ---
 
 **Prepared by:** Antigravity AI  
-**Status:** Task 4.3 Completed  
+**Status:** Task 4.4 Completed  
 **Last updated:** 2026-08-22
+
+## Task 4.4 — Condition Evaluator (Completed)
+
+### Files Created
+- `executor/conditionEvaluator.ts` — condition evaluation engine
+- `tests/conditionEvaluator.test.ts` — 22 unit tests (no DB or network)
+
+### What Was Implemented
+
+`evaluate(condition, ctx)` — evaluates a `Condition` from `shared/ir.ts`:
+1. Resolves `condition.field` via `resolveConditionField` from the template resolver
+2. Applies the operator to `(resolvedLeft, condition.value)`
+3. Returns a `ConditionResult` — never throws
+
+`evaluateOptional(condition | undefined, ctx)` — entry point used by the executor:
+- `undefined` → `{ matched: true, explanation: '...unconditionally.' }`
+- Defined condition → delegates to `evaluate()`
+
+`ConditionSuccess` — returned on successful evaluation:
+```ts
+{ matched: boolean; left: unknown; right: unknown; operator: ConditionOperator; explanation: string }
+```
+
+`ConditionError` — returned on evaluation failure (bad type, unresolvable template, unknown operator):
+```ts
+{ matched: false; code: string; message: string; operator: string; left?: unknown; right?: unknown }
+```
+
+`isConditionSuccess(r)` / `isConditionError(r)` — runtime type guards.
+
+### Operators Supported
+
+| Operator | Rule | Notes |
+|----------|------|-------|
+| `eq` | `left === right` (strict) | Works for string, number, boolean, null |
+| `neq` | `left !== right` (strict) | Same |
+| `gt` | `left > right` (numeric only) | Returns `ConditionError` if either side is not a number |
+
+### Error Codes
+
+| Code | When |
+|------|------|
+| `CONDITION_FIELD_RESOLUTION_ERROR` | Template resolver throws (missing path) |
+| `CONDITION_TYPE_MISMATCH` | `gt` used with non-numeric operand |
+| `CONDITION_UNKNOWN_OPERATOR` | Future-proof guard (unreachable with current IR) |
+
+### Tests Performed
+| # | Test | Result |
+|---|------|--------|
+| 1 | `eq` matching: boolean true === true | ✅ PASS |
+| 2 | `eq` matching: string, number | ✅ PASS |
+| 3 | `eq` seeded AssetRequest approved branch | ✅ PASS |
+| 4 | `eq` non-matching: differing values | ✅ PASS |
+| 5 | `eq` non-matching: number vs string (strict) | ✅ PASS |
+| 6 | `neq` matching (values differ) | ✅ PASS |
+| 7 | `neq` non-matching (values equal) | ✅ PASS |
+| 8 | `neq` seeded AssetRequest rejected branch | ✅ PASS |
+| 9 | `gt` matched (500 > 100) | ✅ PASS |
+| 10 | `gt` not matched (500 <= 500) | ✅ PASS |
+| 11 | `gt` not matched (500 < 1000) | ✅ PASS |
+| 12 | `gt` type error: non-numeric left | ✅ PASS |
+| 13 | `gt` type error: non-numeric right | ✅ PASS |
+| 14 | Template resolution failure → ConditionError | ✅ PASS |
+| 15 | `matched:false` always set on ConditionError | ✅ PASS |
+| 16 | `evaluateOptional(undefined)` → matched:true | ✅ PASS |
+| 17 | `evaluateOptional(cond)` → delegates to evaluate | ✅ PASS |
+| 18–19 | Type guard helpers | ✅ PASS |
+| 20–21 | Explainability: left/right/operator/explanation present | ✅ PASS |
+| 22 | ConditionError exposes code and message | ✅ PASS |
+
+Total: 22/22 PASS (78/78 across Tasks 4.1 + 4.2 + 4.3 + 4.4 combined)
+
+### Commands Run
+- `pnpm vitest run tests/conditionEvaluator.test.ts` → 22/22 PASS
+- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts tests/conditionEvaluator.test.ts` → 78/78 PASS
+- `pnpm typecheck` → exit 0, no TypeScript errors
+
+### Problems Encountered
+None. The implementation directly consumed `Condition` and `ConditionOperator` from `shared/ir.ts` and `resolveConditionField` from `executor/templateResolver.ts`. No new types or dependencies needed.
+
+### Current Project Status
+Four executor building blocks are complete:
+1. **Task 4.1** — `IFormsAdapter` integration boundary
+2. **Task 4.2** — `MockFormsAdapter` deterministic mock
+3. **Task 4.3** — `templateResolver` — resolves `{{trigger.x}}` and `{{nodeId.x}}`
+4. **Task 4.4** — `conditionEvaluator` — evaluates `eq`, `neq`, `gt` with explainable results
+
+The executor now has everything needed to: resolve inputs, evaluate edge conditions, and dispatch function calls through the adapter. The sequential executor (Task 4.5) can be built by composing these pieces.
+
+### Recommended Next Step
+**Task 4.5 — Sequential Executor**: walk the workflow DAG node-by-node, resolve inputs, evaluate edge conditions, call the adapter, handle failure policies (`abort`/`skip`/`redirect`), accumulate step results, and return a `Run` record.
 
 ## References
 
