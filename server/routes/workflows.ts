@@ -224,4 +224,48 @@ router.patch('/:id', async (req: Request, res: Response) => {
   }
 });
 
+// 6. RUN workflow: POST /api/workflows/:id/run
+router.post('/:id/run', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { payload } = req.body;
+
+    if (!payload || typeof payload !== 'object') {
+      return res.status(400).json({ error: 'Trigger payload object is required under "payload"' });
+    }
+
+    const { runWorkflow } = await import('../../executor/runWorkflow');
+    const { MockFormsAdapter } = await import('../../mock-forms-api/mockFormsAdapter');
+
+    const adapter = new MockFormsAdapter();
+    const runResult = await runWorkflow(id, payload, adapter);
+
+    return res.status(201).json({
+      success: true,
+      run: {
+        id: runResult.id,
+        workflowId: runResult.workflowId,
+        version: runResult.version,
+        status: runResult.status,
+        triggerPayload: runResult.triggerPayload,
+        results: runResult.results,
+        startedAt: runResult.startedAt,
+        completedAt: runResult.completedAt
+      }
+    });
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(422).json({
+        success: false,
+        errors: error.errors
+      });
+    }
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes('validation failed') || msg.includes('Validation failed')) {
+      return res.status(422).json({ error: msg });
+    }
+    return res.status(500).json({ error: msg });
+  }
+});
+
 export default router;

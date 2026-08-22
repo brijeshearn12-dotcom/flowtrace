@@ -96,13 +96,13 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized (React, TypeScript, Vite, Express, MongoDB driver, Zod, Dagre, Vitest, ESLint). Builds, types, tests, and lint checks are all passing.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), and Task 4.5 Sequential Executor (`executor/runWorkflow.ts`) updated with **Failure Policies** (abort, skip, redirect) — sequential workflow runner traversing DAGs topologically, handling failures via recovery branches, executing redirect targets immediately, and logging policy outcomes.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), and Task 4.6 Run & Execution-Log API (`server/routes/runs.ts` & `POST /api/workflows/:id/run`) — endpoints for triggering a run with trigger payload validation, getting a run's status, and fetching detailed execution logs.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of run API routes (Task 4.6), UI, and end-to-end tests.
+Implementation of UI (React Flow DAG, forms, runs view) and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -126,17 +126,17 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 11. Condition evaluator never throws — resolution and type errors are wrapped in `ConditionError` so the executor can handle them as first-class values. `gt` is number-only; `eq`/`neq` use strict equality across all types.
 12. Topological/Queue-based Execution: sequential executor processes DAGs by calculating in-degrees, tracking active paths, and skipping children whose parents were not traversed due to branch conditions or step failures.
 13. Redirect/Recovery Topology: Standalone redirect/handler nodes (topological roots with `inDegree === 0` that function as fallback redirect targets) are excluded from the initial execution queue so they only execute when explicitly triggered by a `redirect` failure policy.
+14. Log Construction on the Fly: The execution-log endpoint generates rich system and step log records by merging the executed run details with the corresponding workflow definition version, including latency, inputs, outputs, conditions, and error details.
 
 ## Decisions We Rejected
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Build Run and Log API endpoints (Task 4.6).
-2. Connect React Flow UI.
-3. Rehearse deterministic demo.
+1. Build Frontend UI (React Flow DAG visualization, triggers, and runs panel).
+2. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), and sequential executor tests (6). All non-DB tests pass (84 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 124 tests.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), and route API tests (9). All non-DB tests pass (84 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 129 tests.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -606,10 +606,57 @@ The executor now has everything needed to: resolve inputs, evaluate edge conditi
 - *Fix*: Excluded nodes that are listed as redirect targets from the initial root nodes queue, ensuring they are only run when explicitly reached via a `redirect` failure policy jump.
 
 ### Current Project Status
-All five core execution engine layers are complete, including robust error handling and failure policy recovery mechanics.
+All core backend engine and API layers are now complete:
+1. `IFormsAdapter` boundary (`formsAdapter.ts`)
+2. `MockFormsAdapter` deterministic local stubs (`mockFormsAdapter.ts`)
+3. `templateResolver` context resolution (`templateResolver.ts`)
+4. `conditionEvaluator` precondition & edge checks (`conditionEvaluator.ts`)
+5. `runWorkflow` sequential topological execution loop (`runWorkflow.ts`)
+6. Run & execution-log REST API routes (`server/routes/runs.ts`, `server/routes/workflows.ts`, and `server/index.ts`)
 
 ### Recommended Next Step
-**Task 4.6 — Create Run API routes**: build the API endpoints for executing runs and fetching execution history (`POST /api/workflows/:id/run` and `GET /api/runs/:runId`), exposing execution results to the client.
+**Frontend Development**: connect the backend REST API endpoints to a React + React Flow frontend to visualize the DAG, manually trigger runs via forms, and display real-time/polled execution run statuses and step-by-step logs.
+
+---
+
+**Prepared by:** Antigravity AI  
+**Status:** Task 4.6 Completed  
+**Last updated:** 2026-08-22
+
+## Task 4.6 — Run & Execution-Log API (Completed)
+
+### Files Created/Modified
+- `server/routes/runs.ts` — GET /api/runs/:runId (status) & GET /api/runs/:runId/logs (execution logs)
+- `server/routes/workflows.ts` — POST /api/workflows/:id/run (execution trigger)
+- `server/index.ts` — Mounted the new runs router under `/api/runs`
+- `tests/routes.test.ts` — Added integration tests for triggering runs, getting status, getting rich execution logs, and validation failure responses
+
+### What Was Implemented
+- **Trigger Execution Endpoint** (`POST /api/workflows/:id/run`):
+  - Accepts a manual trigger `payload` in the request body.
+  - Resolves the workflow, publishes and runs the executor synchronously using `runWorkflow`.
+  - Catches validation errors and returns a structured `422 Unprocessable Entity` or `500 Server Error`.
+  - Returns `201 Created` with the full run metadata.
+- **Get Run Status Endpoint** (`GET /api/runs/:runId`):
+  - Fetches and returns the complete `RunDocument` structure representing step outputs, errors, current status, and timestamps.
+- **Get Detailed Execution Logs Endpoint** (`GET /api/runs/:runId/logs`):
+  - Merges runtime database records (`RunDocument`) with workflow definition version configurations (`WorkflowVersionDocument`) to reconstruct rich, chronological log entries.
+  - Exposes inputs, outputs, preconditions, edge conditions, error logs, and failure policy decisions.
+
+### Tests Performed
+- **TEST 8**: API Workflow execution, status polling, and log checking.
+  - Fires a request to `POST /api/workflows/wf_order_placed/run` with trigger payload details.
+  - Asserts `201 Created` and verifies correct structure in the returned `run` object.
+  - Queries `/api/runs/:runId` and verifies execution success status and step results.
+  - Queries `/api/runs/:runId/logs` and asserts chronological logging containing `run_start`, `step_start`, and `run_complete`.
+- **TEST 9**: API Validation failure.
+  - Fires a request to trigger a run with missing/invalid payload properties.
+  - Asserts `422 Unprocessable Entity` and verifies presence of structured validation details.
+
+### Test Results
+- `pnpm vitest run tests/routes.test.ts` → **9/9 PASS**
+- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts tests/conditionEvaluator.test.ts tests/runWorkflow.test.ts tests/routes.test.ts` → **93/93 PASS**
+- `pnpm typecheck` → exit 0, no compilation errors
 
 ## References
 
