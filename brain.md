@@ -96,13 +96,13 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), and Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`) — maps logical workflow IR trigger, nodes, and edges into an interactive graph canvas utilizing Dagre hierarchical layout structures, showing manual trigger forms, custom node components, condition badges, failure policies, active step execution statuses, marker end arrows, minimaps, and full zoom controls.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), and Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`) — provides a read-only detailed preview panel updating in real-time when clicking nodes inside the React Flow DAG, detailing Node ID, Form/Action Types, Operation names, input variables payloads schemas, execution conditions, and failure redirect policy recovery targets.
 
 ## Features Currently Being Built
 None.
 
 ## Pending Features
-Implementation of Trigger Form / Runs Panel (Task 5.5), Execution Logs viewer (Task 5.6), and end-to-end tests.
+Implementation of Trigger Form / Runs Panel (Task 5.6), Execution Logs viewer (Task 5.7), and end-to-end tests.
 
 ## Known Bugs
 No application bugs. All lint rules and typescript typechecks pass cleanly. MongoDB-dependent tests fail when no Atlas connection is available (environment limitation, not a code bug — pre-existing).
@@ -138,7 +138,7 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Build Trigger Form and Runs Panel (Task 5.5).
+1. Build Trigger Form and Runs Panel (Task 5.6).
 2. Rehearse deterministic demo.
 
 ## Testing Status
@@ -705,6 +705,26 @@ All core backend engine and API layers are now complete:
 ### Tests & Verification
 - `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
 - `pnpm run build:client` → **Vite client production bundle compiled successfully in 3.07s**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **140/140 tests pass successfully**
+
+---
+
+## Task 5 Step 5 — Build Node Inspector (Completed)
+
+### Files Created/Modified
+- `client/components/NodeInspector.tsx` — Built details panel showing Node ID, Operation type, inputs payload configuration parameters, and parsed pre-condition / failure policy badges
+- `client/components/WorkflowCanvas.tsx` — Added node click callbacks to feed clicked element context values back to parent state handlers
+- `client/src/main.tsx` — Integrated NodeInspector side-by-side with WorkflowCanvas in a grid system for draft workflows and selected live workflows
+
+### What Was Implemented
+- **Node Configuration Detail Mappings**: Shows node titles, identifiers, schemas inputs, API actions types, Zod expressions evaluation filters, and failure policy recover directions.
+- **Dynamic Selection Handling**: Captures canvas events to instantly refresh the read-only preview properties without reloading elements.
+- **Accessible State Handling**: Includes visual indicators when no nodes are selected to encourage users to click nodes.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 2.95s**
 - `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
 - `pnpm run test` → **140/140 tests pass successfully**
 

@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client';
 import '../styles/tokens.css';
 import { WorkflowHome } from '../pages/WorkflowHome';
 import { WorkflowCanvas } from '../components/WorkflowCanvas';
-import { Workflow } from '../../shared/ir';
+import { NodeInspector } from '../components/NodeInspector';
+import { Workflow, Node } from '../../shared/ir';
 
 const App = () => {
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
@@ -11,12 +12,14 @@ const App = () => {
   const [loadingWorkflow, setLoadingWorkflow] = useState<boolean>(false);
   const [errorWorkflow, setErrorWorkflow] = useState<string | null>(null);
   const [activeDraft, setActiveDraft] = useState<Workflow | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   const handleBack = () => {
     setSelectedWorkflowId(null);
     setSelectedWorkflow(null);
     setActiveDraft(null);
     setErrorWorkflow(null);
+    setSelectedNode(null);
   };
 
   useEffect(() => {
@@ -25,6 +28,7 @@ const App = () => {
     setLoadingWorkflow(true);
     setErrorWorkflow(null);
     setSelectedWorkflow(null);
+    setSelectedNode(null);
 
     fetch(`/api/workflows/${selectedWorkflowId}`)
       .then((res) => {
@@ -79,9 +83,14 @@ const App = () => {
                 This workflow definition was generated from your requirement string. You can inspect its configuration and interact with its visual graph representation.
               </p>
 
-              {/* Render visual graph canvas */}
-              <div style={{ marginBottom: 'var(--spacing-6)' }}>
-                <WorkflowCanvas workflow={activeDraft} />
+              {/* Render visual graph canvas and Node inspector side by side */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-6)' }}>
+                <div style={{ flex: 1, minWidth: '350px' }}>
+                  <WorkflowCanvas workflow={activeDraft} onNodeSelect={(node) => setSelectedNode(node)} />
+                </div>
+                <div style={{ width: '100%' }}>
+                  <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-4)' }}>
@@ -126,9 +135,14 @@ const App = () => {
                     Version: <strong>{selectedWorkflow.version}</strong> | Created: {new Date(selectedWorkflow.createdAt).toLocaleString()}
                   </p>
 
-                  {/* Render visual graph canvas */}
-                  <div style={{ marginBottom: 'var(--spacing-6)' }}>
-                    <WorkflowCanvas workflow={selectedWorkflow} />
+                  {/* Render visual graph canvas and Node inspector side by side */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-6)' }}>
+                    <div style={{ flex: 1, minWidth: '350px' }}>
+                      <WorkflowCanvas workflow={selectedWorkflow} onNodeSelect={(node) => setSelectedNode(node)} />
+                    </div>
+                    <div style={{ width: '100%' }}>
+                      <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-4)' }}>

@@ -159,11 +159,31 @@ const getLayoutedElements = (nodes: RFNode[], edges: RFEdge[], direction = 'LR')
 interface WorkflowCanvasProps {
   workflow: Workflow;
   stepStatuses?: Record<string, 'pending' | 'running' | 'success' | 'failed' | 'skipped'>;
+  onNodeSelect?: (node: FTNode | null) => void;
 }
 
-export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepStatuses = {} }) => {
+export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepStatuses = {}, onNodeSelect }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const onNodeClick = (_event: React.MouseEvent, rfNode: RFNode) => {
+    if (onNodeSelect) {
+      if (rfNode.id === workflow.trigger.id) {
+        onNodeSelect({
+          id: workflow.trigger.id,
+          name: 'Manual Trigger',
+          type: 'form',
+          action: 'trigger',
+          inputs: workflow.trigger.schema as Record<string, unknown> || {},
+        } as FTNode);
+      } else {
+        const ftNode = workflow.nodes.find((n) => n.id === rfNode.id);
+        if (ftNode) {
+          onNodeSelect(ftNode);
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     // 1. Map trigger to a root node
@@ -254,6 +274,7 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepSt
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeClick={onNodeClick}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.5}
