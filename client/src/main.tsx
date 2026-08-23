@@ -5,6 +5,7 @@ import { WorkflowHome } from '../pages/WorkflowHome';
 import { WorkflowCanvas } from '../components/WorkflowCanvas';
 import { NodeInspector } from '../components/NodeInspector';
 import { TriggerPanel } from '../components/TriggerPanel';
+import { RunOverlay } from '../components/RunOverlay';
 import { Workflow, Node } from '../../shared/ir';
 
 const App = () => {
@@ -14,6 +15,8 @@ const App = () => {
   const [errorWorkflow, setErrorWorkflow] = useState<string | null>(null);
   const [activeDraft, setActiveDraft] = useState<Workflow | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const [stepStatuses, setStepStatuses] = useState<Record<string, 'pending' | 'running' | 'success' | 'failed' | 'skipped'>>({});
 
   const handleBack = () => {
     setSelectedWorkflowId(null);
@@ -21,6 +24,8 @@ const App = () => {
     setActiveDraft(null);
     setErrorWorkflow(null);
     setSelectedNode(null);
+    setActiveRunId(null);
+    setStepStatuses({});
   };
 
   useEffect(() => {
@@ -30,6 +35,8 @@ const App = () => {
     setErrorWorkflow(null);
     setSelectedWorkflow(null);
     setSelectedNode(null);
+    setActiveRunId(null);
+    setStepStatuses({});
 
     fetch(`/api/workflows/${selectedWorkflowId}`)
       .then((res) => {
@@ -139,10 +146,10 @@ const App = () => {
                   {/* Render visual graph canvas and Node inspector side by side */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-6)' }}>
                     <div style={{ flex: 1, minWidth: '350px' }}>
-                      <WorkflowCanvas workflow={selectedWorkflow} onNodeSelect={(node) => setSelectedNode(node)} />
+                      <WorkflowCanvas workflow={selectedWorkflow} stepStatuses={stepStatuses} onNodeSelect={(node) => setSelectedNode(node)} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', width: '100%' }}>
-                      <TriggerPanel workflow={selectedWorkflow} />
+                      <TriggerPanel workflow={selectedWorkflow} onRunSuccess={(runId) => setActiveRunId(runId)} />
                       <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />
                     </div>
                   </div>
@@ -154,6 +161,15 @@ const App = () => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {activeRunId && selectedWorkflow && (
+              <RunOverlay 
+                runId={activeRunId} 
+                workflow={selectedWorkflow} 
+                onClose={() => setActiveRunId(null)}
+                onStepStatusesChange={(statuses) => setStepStatuses(statuses)}
+              />
             )}
           </div>
         )}
