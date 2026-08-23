@@ -96,10 +96,10 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`) — manual trigger panel detecting required trigger fields from schema, rendering form inputs, supporting boolean checkboxes and numeric fields, validating fields before execution, triggering runs via `/api/workflows/:id/run` API, and displaying returned run IDs with loading/error states. Integrated with selected workflow details view in `client/src/main.tsx`, Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`) — run status polling and visualization overlay on top of selected workflow canvas that polls status/logs endpoints in real-time, displays chronological logs, highlights step outputs/resolved inputs, handles branch decisions and errors/failure policies (such as redirects), highlights execution status live on the DAG graph nodes, and automatically terminates polling when reaching terminal states, Task 6 Step 1: Add Draft State (`client/components/NodeInspector.tsx` & `client/src/main.tsx`) — separated editable workflow draft sandbox from immutable published version. Added viewMode switching tabs, unsaved changes indicators, copy initialization from published version, patch generation using diffing algorithm, save action to backend `PATCH /api/workflows/:id` (creating a new draft version on database), and publish action promoting the draft, and Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx` & `client/components/NodeInspector.tsx`) — implemented safe validation editor for editing operation inputs (validating JSON), conditions (field, operator, value), node label (name), and failure policies (redirect node target validation against workflow nodes and triggers list), rendering helpful error messages before committing changes to the draft copy.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`) — manual trigger panel detecting required trigger fields from schema, rendering form inputs, supporting boolean checkboxes and numeric fields, validating fields before execution, triggering runs via `/api/workflows/:id/run` API, and displaying returned run IDs with loading/error states. Integrated with selected workflow details view in `client/src/main.tsx`, Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`) — run status polling and visualization overlay on top of selected workflow canvas that polls status/logs endpoints in real-time, displays chronological logs, highlights step outputs/resolved inputs, handles branch decisions and errors/failure policies (such as redirects), highlights execution status live on the DAG graph nodes, and automatically terminates polling when reaching terminal states, Task 6 Step 1: Add Draft State (`client/components/NodeInspector.tsx` & `client/src/main.tsx`) — separated editable workflow draft sandbox from immutable published version. Added viewMode switching tabs, unsaved changes indicators, copy initialization from published version, patch generation using diffing algorithm, save action to backend `PATCH /api/workflows/:id` (creating a new draft version on database), and publish action promoting the draft, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx` & `client/components/NodeInspector.tsx`) — implemented safe validation editor for editing operation inputs (validating JSON), conditions (field, operator, value), node label (name), and failure policies (redirect node target validation against workflow nodes and triggers list), rendering helpful error messages before committing changes to the draft copy, Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx` & `client/src/main.tsx`) — implemented visual patch diff preview showing node/edge additions, deletions, updates (labels, actions, conditions, and failure policies changes) with a clear empty state showing "sandbox matches base version" when no edits are present, and Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts` & `/api/workflows/:id/agent-edit`) — deterministic agent edit service mapping natural language instructions to reviewable patch proposals without auto-publishing or modifying base database records.
 
 ## Features Currently Being Built
-Natural language patch editing system (Task 5.8).
+None.
 
 ## Pending Features
 End-to-end tests.
@@ -192,7 +192,7 @@ Do not change the canonical IR shape, template reference syntax, version immutab
 Webhooks, cron, retries, background workers, RBAC, parallel branches, richer LLM interpretation, and external integrations.
 
 ## Last Updated
-2026-08-22
+2026-08-23
 
 ## Brain Rules
 
@@ -241,13 +241,13 @@ The visual architecture data flow diagram mapping components, folders, and data 
 
 ## Last Updated
 
-2026-08-22
+2026-08-23
 
 ---
 
 **Prepared by:** Antigravity AI  
 **Status:** Task 4.2 Completed  
-**Last updated:** 2026-08-22
+**Last updated:** 2026-08-23
 
 ## Task 4.1 — Forms API Adapter (Completed)
 
@@ -729,8 +729,31 @@ All core backend engine and API layers are now complete:
 - `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
 - `pnpm run test` → **140/140 tests pass successfully**
 
+
+---
+
+## Task 5.8 / Step 4 — Build Agent Proposal Endpoint (Completed)
+
+### Files Created/Modified
+- `server/services/agentEditService.ts` — Deterministic agent proposal service.
+- `server/routes/workflows.ts` — Registered `POST /api/workflows/:id/agent-edit` route.
+- `shared/api.ts` — Updated `AgentEditResponse` interface to support optional `warning` field.
+- `tests/agentEdit.test.ts` — Added comprehensive unit and integration tests.
+
+### What Was Implemented
+- **Deterministic Seeded Phrase Mappings**: Phrase and keyword matcher rules mapping prompts (e.g. inserting steps, updating input parameters, changing policies) for demo workflows (`wf_order_placed` and `wf_asset_request_approval`) to structured JSON patch proposals.
+- **Reviewable Patch Proposal Only**: The endpoint generates and proposes structured patches compatible with the existing draft/patch model, without saving them to the database or modifying published workflows.
+- **Warning for Unknown Instructions**: Prompts that cannot be matched deterministically return a warning and empty patch instead of guessing.
+- **No LLM or API Keys Required**: Kept optional LLM integration disabled by default to run entirely locally and deterministically.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **150/150 tests pass successfully** (including 10 new agent-edit unit & integration tests)
+
 ## References
 
 [1]: /home/ubuntu/upload/Pasted_content.txt "Workflow Engine problem statement"
 [2]: /home/ubuntu/upload/Pasted_content_01.txt "Hackathon CTO execution brief"
 This update is based on the supplied documents [1] [2] [3].
+

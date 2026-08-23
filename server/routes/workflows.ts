@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { WorkflowRepository, VersionRepository } from '../../persistence';
 import { VersionService, StaleVersionError, ValidationError } from '../services/versionService';
+import { AgentEditService } from '../services/agentEditService';
 import { Workflow } from '../../shared/ir';
+
 import { validateWorkflow } from '../../shared/validator';
 
 const router = Router();
@@ -268,4 +270,28 @@ router.post('/:id/run', async (req: Request, res: Response) => {
   }
 });
 
+// 7. AGENT edit: POST /api/workflows/:id/agent-edit
+router.post('/:id/agent-edit', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { prompt } = req.body;
+
+    if (!prompt || typeof prompt !== 'string') {
+      return res.status(400).json({ error: 'Prompt string is required under "prompt"' });
+    }
+
+    const wf = await WorkflowRepository.get(id);
+    if (!wf) {
+      return res.status(404).json({ error: `Workflow with ID "${id}" not found` });
+    }
+
+    const proposal = AgentEditService.generateProposal(id, prompt);
+    return res.json(proposal);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ error: msg });
+  }
+});
+
 export default router;
+

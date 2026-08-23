@@ -6,6 +6,7 @@ import { WorkflowCanvas } from '../components/WorkflowCanvas';
 import { NodeInspector } from '../components/NodeInspector';
 import { TriggerPanel } from '../components/TriggerPanel';
 import { RunOverlay } from '../components/RunOverlay';
+import { PatchDiff } from '../components/PatchDiff';
 import { Workflow, Node } from '../../shared/ir';
 
 const App = () => {
@@ -404,6 +405,9 @@ const App = () => {
                         onUpdateNode={handleUpdateNode}
                         onClose={() => setSelectedNode(null)} 
                       />
+                      {viewMode === 'draft' && (
+                        <PatchDiff base={selectedWorkflow} updated={localDraft} />
+                      )}
                     </div>
                   </div>
 

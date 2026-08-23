@@ -87,4 +87,6 @@ export interface AgentEditResponse {
   success: boolean;
   explanation: string;
   patch: WorkflowPatchInput;
+  warning?: string;
 }
+
