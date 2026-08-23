@@ -45,6 +45,7 @@ export interface Workflow {
   trigger: Trigger;
   nodes: Node[];
   edges: Edge[];
+  publishedVersionId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

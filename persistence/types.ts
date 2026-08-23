@@ -24,6 +24,8 @@ export interface WorkflowVersionDocument {
   nodes: Node[];
   edges: Edge[];
   createdAt: string;
+  source?: 'manual' | 'agent';
+  summary?: string;
 }
 
 export interface RunDocument {

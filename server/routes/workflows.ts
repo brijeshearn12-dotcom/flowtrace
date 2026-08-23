@@ -59,6 +59,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       trigger: versionDoc.trigger,
       nodes: versionDoc.nodes,
       edges: versionDoc.edges,
+      publishedVersionId: wf.publishedVersionId,
       createdAt: wf.createdAt,
       updatedAt: wf.updatedAt
     };
@@ -212,7 +213,10 @@ router.patch('/:id', async (req: Request, res: Response) => {
     }
     const baseVersion = parseInt(String(baseVersionStr), 10);
 
-    const { workflow, version } = await VersionService.createDraft(id, baseVersion, patch);
+    const source = (req.query.source || req.headers['x-source'] || 'manual') as 'manual' | 'agent';
+    const summary = (req.query.summary || req.headers['x-change-summary'] || 'Manual configuration edit') as string;
+
+    const { workflow, version } = await VersionService.createDraft(id, baseVersion, patch, { source, summary });
     return res.json({
       success: true,
       workflow: {

@@ -7,6 +7,7 @@ import { NodeInspector } from '../components/NodeInspector';
 import { TriggerPanel } from '../components/TriggerPanel';
 import { RunOverlay } from '../components/RunOverlay';
 import { PatchDiff } from '../components/PatchDiff';
+import { VersionHistory } from '../components/VersionHistory';
 import { Workflow, Node } from '../../shared/ir';
 import { validateWorkflow } from '../../shared/validator';
 
@@ -29,6 +30,9 @@ const App = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [isApproved, setIsApproved] = useState<boolean>(false);
+  const [latestVersionNumber, setLatestVersionNumber] = useState<number | null>(null);
+  const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState<number>(0);
+
 
 
   const handleBack = () => {
@@ -44,6 +48,7 @@ const App = () => {
     setSaveError(null);
     setPublishError(null);
     setIsApproved(false);
+    setLatestVersionNumber(null);
   };
 
   useEffect(() => {
@@ -60,6 +65,7 @@ const App = () => {
     setSaveError(null);
     setPublishError(null);
     setIsApproved(false);
+    setLatestVersionNumber(null);
 
     fetch(`/api/workflows/${selectedWorkflowId}`)
       .then((res) => {
@@ -71,6 +77,7 @@ const App = () => {
       .then((data: Workflow) => {
         setSelectedWorkflow(data);
         setLocalDraft(data);
+        setLatestVersionNumber(data.version);
         setViewMode(data.status === 'published' ? 'published' : 'draft');
       })
       .catch((err) => {
@@ -192,8 +199,10 @@ const App = () => {
       const newWf = await fetchRes.json();
       setSelectedWorkflow(newWf);
       setLocalDraft(newWf);
+      setLatestVersionNumber(newWf.version);
       setViewMode('draft');
       setIsApproved(false);
+      setHistoryRefreshTrigger(prev => prev + 1);
       alert(`Draft version ${newWf.version} saved successfully!`);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : String(err));
@@ -225,8 +234,10 @@ const App = () => {
       const newWf = await fetchRes.json();
       setSelectedWorkflow(newWf);
       setLocalDraft(newWf);
+      setLatestVersionNumber(newWf.version);
       setViewMode('published');
       setIsApproved(false);
+      setHistoryRefreshTrigger(prev => prev + 1);
       alert(`Workflow version ${newWf.version} published successfully!`);
     } catch (err) {
       setPublishError(err instanceof Error ? err.message : String(err));
@@ -251,6 +262,33 @@ const App = () => {
   const handleDiscardChanges = () => {
     setLocalDraft(selectedWorkflow);
     setIsApproved(false);
+  };
+
+  const handleSelectVersion = async (versionNumber: number) => {
+    if (selectedWorkflowId) {
+      setLoadingWorkflow(true);
+      setErrorWorkflow(null);
+      setSelectedNode(null);
+
+      try {
+        const res = await fetch(`/api/workflows/${selectedWorkflowId}?version=${versionNumber}`);
+        if (!res.ok) {
+          throw new Error(`Failed to load workflow version ${versionNumber}: status ${res.status}`);
+        }
+        const data: Workflow = await res.json();
+        setSelectedWorkflow(data);
+        
+        if (versionNumber === latestVersionNumber) {
+          setViewMode(data.status === 'published' ? 'published' : 'draft');
+        } else {
+          setViewMode('published');
+        }
+      } catch (err) {
+        setErrorWorkflow(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoadingWorkflow(false);
+      }
+    }
   };
 
   const validation = viewMode === 'draft' && localDraft
@@ -358,8 +396,8 @@ const App = () => {
                     )}
                   </p>
 
-                  {/* ViewMode Tabs (Only show if workflow is published at least once) */}
-                  {selectedWorkflow.status === 'published' && (
+                  {/* ViewMode Tabs (Only show if workflow is published at least once and we are on the latest version) */}
+                  {selectedWorkflow.status === 'published' && selectedWorkflow.version === latestVersionNumber ? (
                     <div style={{ display: 'flex', gap: 'var(--spacing-2)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-3)', marginBottom: 'var(--spacing-6)' }}>
                       <button 
                         className={`ft-btn ${viewMode === 'published' ? 'ft-btn-primary' : 'ft-btn-secondary'}`}
@@ -384,7 +422,16 @@ const App = () => {
                         Draft Sandbox
                       </button>
                     </div>
-                  )}
+                  ) : selectedWorkflow.version !== latestVersionNumber ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-3)', marginBottom: 'var(--spacing-6)' }}>
+                      <span className="ft-badge ft-badge-warning" style={{ textTransform: 'uppercase', fontSize: '10px' }}>
+                        Read-Only Inspection
+                      </span>
+                      <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                        Viewing historical <strong>Version {selectedWorkflow.version}</strong>. Editing is disabled. Select the latest version in the history panel to edit.
+                      </span>
+                    </div>
+                  ) : null}
 
                   {/* Render visual graph canvas and Node inspector side by side */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-6)' }}>
@@ -421,6 +468,14 @@ const App = () => {
                       {viewMode === 'draft' && (
                         <PatchDiff base={selectedWorkflow} updated={localDraft} />
                       )}
+                      <VersionHistory
+                        workflowId={selectedWorkflow.id}
+                        currentVersion={selectedWorkflow.version}
+                        publishedVersionId={selectedWorkflow.publishedVersionId || null}
+                        workflowStatus={selectedWorkflow.status}
+                        onSelectVersion={handleSelectVersion}
+                        refreshTrigger={historyRefreshTrigger}
+                      />
                     </div>
                   </div>
 

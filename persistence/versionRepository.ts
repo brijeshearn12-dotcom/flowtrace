@@ -17,6 +17,8 @@ export class VersionRepository {
     trigger: Trigger;
     nodes: Node[];
     edges: Edge[];
+    source?: 'manual' | 'agent';
+    summary?: string;
   }): Promise<WorkflowVersionDocument> {
     const doc = {
       workflowId: version.workflowId,
@@ -25,6 +27,8 @@ export class VersionRepository {
       nodes: version.nodes,
       edges: version.edges,
       createdAt: new Date().toISOString(),
+      source: version.source || 'manual',
+      summary: version.summary || '',
     };
     const result = await this.getCollection().insertOne(doc);
     return mapDocument<Document, WorkflowVersionDocument>({

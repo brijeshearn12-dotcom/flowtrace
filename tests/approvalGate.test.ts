@@ -101,23 +101,6 @@ describe('Approval Gate and Publish Safety Tests', () => {
     // Create starting workflow
     await VersionService.createWorkflow('wf_gate_test', 'Gate Test', trigger, validNodes, validEdges);
 
-    // Create an invalid draft update (adds a step referencing a non-existent step, violating validator rules)
-    const invalidPatch = [
-      {
-        op: 'add' as const,
-        path: '/nodes/0',
-        value: {
-          id: 'invalid_node',
-          name: 'Invalid Node',
-          type: 'action' as const,
-          action: 'Slack.post',
-          inputs: {
-            message: '{{non_existent.output}}' // invalid reference path
-          }
-        }
-      }
-    ];
-
     // Note: createDraft checks validator internally, so to simulate an invalid draft that bypassed checks
     // or is syntactically invalid at runtime, we can bypass the draft creation validation by inserting it
     // into db or simply check if validation rejects.

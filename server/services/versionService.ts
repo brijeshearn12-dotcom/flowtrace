@@ -103,7 +103,8 @@ export class VersionService {
     name: string,
     trigger: Trigger,
     nodes: Node[],
-    edges: Edge[]
+    edges: Edge[],
+    metadata?: { source?: 'manual' | 'agent'; summary?: string }
   ): Promise<{ workflow: WorkflowDocument; version: WorkflowVersionDocument }> {
     const existing = await WorkflowRepository.get(id);
     if (existing) {
@@ -141,6 +142,8 @@ export class VersionService {
       trigger,
       nodes,
       edges,
+      source: metadata?.source || 'agent', // By default, version 1 parsed from NLP is agent-detected
+      summary: metadata?.summary || 'Initial requirement detection',
     });
 
     return { workflow, version };
@@ -152,7 +155,8 @@ export class VersionService {
   static async createDraft(
     workflowId: string,
     baseVersion: number,
-    patch: WorkflowPatchInput
+    patch: WorkflowPatchInput,
+    metadata?: { source?: 'manual' | 'agent'; summary?: string }
   ): Promise<{ workflow: WorkflowDocument; version: WorkflowVersionDocument }> {
     const workflow = await WorkflowRepository.get(workflowId);
     if (!workflow) {
@@ -203,6 +207,8 @@ export class VersionService {
       trigger: patchedBase.trigger,
       nodes: patchedBase.nodes,
       edges: patchedBase.edges,
+      source: metadata?.source || 'manual',
+      summary: metadata?.summary || 'Manual configuration edit',
     });
 
     // Update parent workflow pointers (status becomes draft, version increments)

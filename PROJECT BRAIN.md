@@ -96,7 +96,8 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 Baseline toolchain and package structure initialized.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`) — manual trigger panel detecting required trigger fields from schema, rendering form inputs, supporting boolean checkboxes and numeric fields, validating fields before execution, triggering runs via `/api/workflows/:id/run` API, and displaying returned run IDs with loading/error states. Integrated with selected workflow details view in `client/src/main.tsx`, Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`) — run status polling and visualization overlay on top of selected workflow canvas that polls status/logs endpoints in real-time, displays chronological logs, highlights step outputs/resolved inputs, handles branch decisions and errors/failure policies (such as redirects), highlights execution status live on the DAG graph nodes, and automatically terminates polling when reaching terminal states, Task 6 Step 1: Add Draft State (`client/components/NodeInspector.tsx` & `client/src/main.tsx`) — separated editable workflow draft sandbox from immutable published version. Added viewMode switching tabs, unsaved changes indicators, copy initialization from published version, patch generation using diffing algorithm, save action to backend `PATCH /api/workflows/:id` (creating a new draft version on database), and publish action promoting the draft, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx` & `client/components/NodeInspector.tsx`) — implemented safe validation editor for editing operation inputs (validating JSON), conditions (field, operator, value), node label (name), and failure policies (redirect node target validation against workflow nodes and triggers list), rendering helpful error messages before committing changes to the draft copy, Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx` & `client/src/main.tsx`) — implemented visual patch diff preview showing node/edge additions, deletions, updates (labels, actions, conditions, and failure policies changes) with a clear empty state showing "sandbox matches base version" when no edits are present, Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts` & `/api/workflows/:id/agent-edit`) — deterministic agent edit service mapping natural language instructions to reviewable patch proposals without auto-publishing or modifying base database records, and Task 6 Step 4 (Step 5): Add Approval Gate (`client/src/main.tsx`, `server/routes/workflows.ts`, `server/services/versionService.ts`) — added client-side validation display, manual approval checkbox gate, and backend target baseVersion stale/locked checks preventing invalid or stale draft publishing.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`) — manual trigger panel detecting required trigger fields from schema, rendering form inputs, supporting boolean checkboxes and numeric fields, validating fields before execution, triggering runs via `/api/workflows/:id/run` API, and displaying returned run IDs with loading/error states. Integrated with selected workflow details view in `client/src/main.tsx`, Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`) — run status polling and visualization overlay on top of selected workflow canvas that polls status/logs endpoints in real-time, displays chronological logs, highlights step outputs/resolved inputs, handles branch decisions and errors/failure policies (such as redirects), highlights execution status live on the DAG graph nodes, and automatically terminates polling when reaching terminal states, Task 6 Step 1: Add Draft State (`client/components/NodeInspector.tsx` & `client/src/main.tsx`) — separated editable workflow draft sandbox from immutable published version. Added viewMode switching tabs, unsaved changes indicators, copy initialization from published version, patch generation using diffing algorithm, save action to backend `PATCH /api/workflows/:id` (creating a new draft version on database), and publish action promoting the draft, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx` & `client/components/NodeInspector.tsx`) — implemented safe validation editor for editing operation inputs (validating JSON), conditions (field, operator, value), node label (name), and failure policies (redirect node target validation against workflow nodes and triggers list), rendering helpful error messages before committing changes to the draft copy, Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx` & `client/src/main.tsx`) — implemented visual patch diff preview showing node/edge additions, deletions, updates (labels, actions, conditions, and failure policies changes) with a clear empty state showing "sandbox matches base version" when no edits are present, Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts` & `/api/workflows/:id/agent-edit`) — deterministic agent edit service mapping natural language instructions to reviewable patch proposals without auto-publishing or modifying base database records, Task 6 Step 4 (Step 5): Add Approval Gate (`client/src/main.tsx`, `server/routes/workflows.ts`, `server/services/versionService.ts`) — added client-side validation display, manual approval checkbox gate, and backend target baseVersion stale/locked checks preventing invalid or stale draft publishing, and Task 6 Step 5 (Step 6): Add Version History (`client/components/VersionHistory.tsx`, `client/src/main.tsx`, `server/routes/workflows.ts`, `shared/ir.ts`, `persistence/types.ts`, `persistence/versionRepository.ts`, `server/services/versionService.ts`) — created read-only version history side panel showing version metadata (number, manual/agent source, description summary, status badges, and timestamp), rendering read-only warning banners and disabling draft sandboxes/trigger forms when inspecting historical immutable records.
+100: 
 100: 
 
 ## Features Currently Being Built
@@ -767,12 +768,229 @@ All core backend engine and API layers are now complete:
 - **Explicit Human Approval Checkbox**: Renders a checkbox gate in the React UI requiring explicit approval of the draft version once validation is clean, before the publication action is enabled.
 - **Client-Side Validation Blockers**: Automatically runs shared validation checks (`validateWorkflow`) against the local draft version and renders all errors/blockers in high-contrast red alerts if validation fails.
 - **Backend Concurrency Protection**: Reads baseVersion from query param/header/body and rejects requests with a 409 Conflict if the requested version is stale or if the workflow is already published.
+## Task 4.5 — Sequential Executor & Failure Policies (Completed)
+
+### Files Created/Modified
+- `executor/runWorkflow.ts` — sequential workflow executor implementation with support for abort, skip, and redirect policies
+- `tests/runWorkflow.test.ts` — unit and integration tests covering topological ordering, trigger schemas, and all failure policies
+
+### What Was Implemented
+- `runWorkflow(workflowId, triggerPayload, adapter)` with Failure Policy handling:
+  - Retrieves target workflow and loads its published version pointer (`publishedVersionId`).
+  - Validates workflow schema and invariants (`validateWorkflow`).
+  - Validates trigger payload using JSON Schema rules (`validateTriggerPayload`).
+  - Creates a run record in status `running` and saves to MongoDB.
+  - Generates audit events for execution.
+  - Computes adjacency lists and in-degrees for BFS/topological DAG traversal.
+  - Excludes standalone redirect recovery target nodes (which function as fallback error handler steps but have `inDegree === 0`) from the initial root nodes queue.
+  - Dynamically evaluates preconditions on nodes and traversing edges (`evaluateOptional`).
+  - Automatically skips nodes that are unreached due to edge condition mismatches or parent skips.
+  - Dynamically resolves input templates (`resolveInputs`) right before the step executes.
+  - On node failure, evaluates the step's `failurePolicy`:
+    - **abort** (default): Stores step result as `failed`, marks the overall run status as `failed`, updates the run record in MongoDB, and terminates the execution loop immediately.
+    - **skip**: Stores step result as `skipped` with the error reason recorded, updates MongoDB, and traverses outgoing edges to queue downstream eligible nodes, allowing the workflow to continue executing.
+    - **redirect**: Stores step result as `failed`, clears the current execution queue to abort parallel branches, queues the configured `redirectTargetId` node as active, updates MongoDB, and continues loop execution from the recovery node.
+  - Updates and persists the run document in MongoDB after every step completes.
+
+### Tests Performed
+- **TEST 1**: Sequential execution of the seeded `OrderPlaced` workflow. Verifies that all steps execute in correct order, context output dynamically resolves, and execution is persisted.
+- **TEST 2**: Validation rejection. Verifies that trigger payloads with missing fields or type mismatches throw errors before starting execution, creating zero run records.
+- **TEST 3**: Published validation. Verifies that trying to execute workflows with no published version throws an exception.
+- **TEST 4**: Step failure abort handling. Verifies that when a step fails under abort, the executor marks the step as failed, stops queue processing, sets final status to `failed`, and persists it in MongoDB.
+- **TEST 5**: Skip failure policy test. Verifies that when a step fails with a skip policy, the step is recorded as `skipped` with the error reason saved, and the subsequent nodes run successfully, yielding an overall run status of `success`.
+- **TEST 6**: Redirect failure policy test. Verifies that when `approved-action` fails in the seeded `AssetRequestApproval` workflow, the executor jumps to the `failure-handler` step, executes it successfully, and updates the final run status to `success`.
+
+### Test Results
+- `pnpm vitest run tests/runWorkflow.test.ts` → **6/6 PASS** (with fast-timeout skip when running offline/no Atlas)
+- `pnpm vitest run tests/formsAdapter.test.ts tests/mockFormsAdapter.test.ts tests/templateResolver.test.ts tests/conditionEvaluator.test.ts tests/runWorkflow.test.ts` → **84/84 PASS**
+- `pnpm typecheck` → exit 0, no TypeScript compilation errors
+
+### Problems Encountered
+- Standalone redirect handler nodes with 0 incoming edges would normally be queued at startup.
+- *Fix*: Excluded nodes that are listed as redirect targets from the initial root nodes queue, ensuring they are only run when explicitly reached via a `redirect` failure policy jump.
+
+### Current Project Status
+All core backend engine and API layers are now complete:
+1. `IFormsAdapter` boundary (`formsAdapter.ts`)
+2. `MockFormsAdapter` deterministic local stubs (`mockFormsAdapter.ts`)
+3. `templateResolver` context resolution (`templateResolver.ts`)
+4. `conditionEvaluator` precondition & edge checks (`conditionEvaluator.ts`)
+5. `runWorkflow` sequential topological execution loop (`runWorkflow.ts`)
+6. Run & execution-log REST API routes (`server/routes/runs.ts`, `server/routes/workflows.ts`, and `server/index.ts`)
+7. Deterministic Requirement Detector (`detector/index.ts` and `server/routes/detect.ts`)
+8. Design Tokens for UI styling (`client/styles/tokens.css` and `client/styles/UI_SYSTEM.md`)
+9. Workflow List dashboard page (`client/pages/WorkflowHome.tsx` and main app navigation)
+
+### Recommended Next Step
+**Task 5 Step 3 — Build detection composer**: create the interactive natural-language detector component at `client/components/DetectionComposer.tsx` to let users type text requirements, request IR drafts from the API, and preview status/warnings.
+
+---
+
+**Prepared by:** Antigravity AI  
+**Status:** Task 5 Step 2 Completed  
+**Last updated:** 2026-08-22
+
+## Task 5 Step 1 — Create Design Tokens (Completed)
+
+### Files Created/Modified
+- `client/styles/tokens.css` — Centralized style tokens (colors, accessible status variables, spacing, radius, fonts) and base/utility classes
+- `client/styles/UI_SYSTEM.md` — Design system reference document explaining classes and variables
+
+### What Was Implemented
+- **Accessible Color Palette**: Isolated primary background, borders, text colors, and brand indigo color.
+- **High-contrast Status Rules**: Isolated colors for `success`, `warning` (skipped), `error` (failed), and `running` states.
+- **Typography & Spacing**: Enforced system sans font stack, uniform font scales, and spacing intervals based on `4px` grid (`var(--spacing-1)` through `var(--spacing-12)`).
+- **Utility Classes**: Styled hoverable `.ft-card` container, `.ft-btn` buttons, and status-colored `.ft-badge` indicators.
+
+---
+
+## Task 5 Step 2 — Build Workflow List (Completed)
+
+### Files Created/Modified
+- `client/pages/WorkflowHome.tsx` — Dashboard component showing list of workflows from the `/api/workflows` API
+- `client/src/main.tsx` — Configured main state management routing to WorkflowHome dashboard or active selected workflow views
+- `client/vite.config.ts` — Added server proxy mapping `/api/*` requests to the local backend port `3001`
+
+### What Was Implemented
+- **Dynamic API Listing**: Fetches workflows from the backend dynamically and loops through elements.
+- **Interactive Workflow Cards**: Renders title, status badge, version info, and ID, calling selected callback on user click.
+- **Loading & Error Handles**: Renders clean Loading screens, empty draft fallbacks, and connection error alerts with connection Retry action triggers.
+- **Consumed Design Tokens**: Styled page layouts and elements using utility classes and variables from `tokens.css`.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint constraints met**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 842ms**
+- `pnpm typecheck` → **exit 0, all compiler checks passing**
+- `pnpm vitest run` → **100/100 tests passed successfully**
+
+---
+
+## Task 5 Step 3 — Build Detection Composer (Completed)
+
+### Files Created/Modified
+- `client/components/DetectionComposer.tsx` — Component offering NLP textarea requirements input, preset templates selection, metadata inserts, confidence ratings, warnings display lists, and draft nodes/edges summary views
+- `client/pages/WorkflowHome.tsx` — Mounted DetectionComposer in the dashboard 2-column layout grid
+- `client/src/main.tsx` — Added state management to support previewing NLP-generated active draft details
+- `package.json` — Configured sequential testing settings using `--maxWorkers=1` to prevent database race conditions
+
+### What Was Implemented
+- **Natural Language Parsing Interface**: Offers a text area input connected to `POST /api/detect` for parsing plain English inputs into IR draft structures.
+- **Predefined Presets**: Includes select drop-downs to pre-populate text inputs with the seeded *Order Placed* and *Asset Request Approval* requirements.
+- **Metadata Reference Inserter**: Allows inserting allowlisted metadata items (forms, functions, operators) into the text description.
+- **Execution Draft Cards**: Details generated draft schemas (trigger properties, action steps, conditon nodes, edge lists) and provides confidence badges and validation warnings summaries.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 1.01s**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **100/100 tests pass successfully** (sequential mode prevents DB lock conflicts)
+
+---
+
+## Task 5 Step 4 — Render React Flow DAG (Completed)
+
+### Files Created/Modified
+- `client/components/WorkflowCanvas.tsx` — Custom visual interactive graph canvas utilizing React Flow, Dagre layouts, custom nodes, conditional edges, minimaps, and zoom controls
+- `client/src/main.tsx` — Integrated WorkflowCanvas to render interactive visual graphs for both selected workflows and NLP-detected active drafts
+
+### What Was Implemented
+- **React Flow Integration**: Integrated custom customNode render mappings to display node metadata, action types, trigger forms, and step operations.
+- **Hierarchical Layout (Dagre)**: Automated layout calculations to position nodes cleanly in left-to-right (LR) topology, avoiding overlapping nodes.
+- **Pre-conditions & Failure-policies**: Styled pre-condition logic filters (`if: operator`) and failure policies (`on_fail: action`) as colored metadata pills/badges on custom nodes.
+- **Conditional Edge Renderers**: Styled conditional transitions as custom dashed curves with colored indicator labels (e.g. `eq`, `neq`, `gt`).
+- **Interactive Graph Features**: Wired standard Minimap previews, fit view paddings, control boards, and mouse click/pan zoom actions.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 3.07s**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **140/140 tests pass successfully**
+
+---
+
+## Task 5 Step 5 — Build Node Inspector (Completed)
+
+### Files Created/Modified
+- `client/components/NodeInspector.tsx` — Built details panel showing Node ID, Operation type, inputs payload configuration parameters, and parsed pre-condition / failure policy badges
+- `client/components/WorkflowCanvas.tsx` — Added node click callbacks to feed clicked element context values back to parent state handlers
+- `client/src/main.tsx` — Integrated NodeInspector side-by-side with WorkflowCanvas in a grid system for draft workflows and selected live workflows
+
+### What Was Implemented
+- **Node Configuration Detail Mappings**: Shows node titles, identifiers, schemas inputs, API actions types, Zod expressions evaluation filters, and failure policy recover directions.
+- **Dynamic Selection Handling**: Captures canvas events to instantly refresh the read-only preview properties without reloading elements.
+- **Accessible State Handling**: Includes visual indicators when no nodes are selected to encourage users to click nodes.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm run build:client` → **Vite client production bundle compiled successfully in 2.95s**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **140/140 tests pass successfully**
+
+
+---
+
+## Task 5.8 / Step 4 — Build Agent Proposal Endpoint (Completed)
+
+### Files Created/Modified
+- `server/services/agentEditService.ts` — Deterministic agent proposal service.
+- `server/routes/workflows.ts` — Registered `POST /api/workflows/:id/agent-edit` route.
+- `shared/api.ts` — Updated `AgentEditResponse` interface to support optional `warning` field.
+- `tests/agentEdit.test.ts` — Added comprehensive unit and integration tests.
+
+### What Was Implemented
+- **Deterministic Seeded Phrase Mappings**: Phrase and keyword matcher rules mapping prompts (e.g. inserting steps, updating input parameters, changing policies) for demo workflows (`wf_order_placed` and `wf_asset_request_approval`) to structured JSON patch proposals.
+- **Reviewable Patch Proposal Only**: The endpoint generates and proposes structured patches compatible with the existing draft/patch model, without saving them to the database or modifying published workflows.
+- **Warning for Unknown Instructions**: Prompts that cannot be matched deterministically return a warning and empty patch instead of guessing.
+- **No LLM or API Keys Required**: Kept optional LLM integration disabled by default to run entirely locally and deterministically.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **150/150 tests pass successfully** (including 10 new agent-edit unit & integration tests)
+
+---
+
+## Task 6 Step 4 / Step 5 — Add Approval Gate (Completed)
+
+### Files Created/Modified
+- `client/src/main.tsx` — Embedded client-side validation blockers panel, `Approve draft` manual checkbox gate, and passed query param `baseVersion` in the publish request.
+- `server/routes/workflows.ts` — Added check in publish route for missing or invalid `baseVersion` parameter, enforcing draft concurrency.
+- `server/services/versionService.ts` — Updated `publishVersion` to enforce stale version checks (`versionNumber !== workflow.latestVersion`) and locked checks (`workflow.status === 'published'`).
+- `tests/routes.test.ts` — Updated publish route integration tests to pass the expected draft `baseVersion`.
+- `tests/approvalGate.test.ts` — Implemented comprehensive suite verifying publish validations, block on invalid drafts, stale baseVersion rejection, and previous version immutability.
+
+### What Was Implemented
+- **Explicit Human Approval Checkbox**: Renders a checkbox gate in the React UI requiring explicit approval of the draft version once validation is clean, before the publication action is enabled.
+- **Client-Side Validation Blockers**: Automatically runs shared validation checks (`validateWorkflow`) against the local draft version and renders all errors/blockers in high-contrast red alerts if validation fails.
+- **Backend Concurrency Protection**: Reads baseVersion from query param/header/body and rejects requests with a 409 Conflict if the requested version is stale or if the workflow is already published.
 - **Immutability & Safety**: Ensuring that published versions are never modified in place and only valid, non-stale, explicitly approved drafts can be promoted.
 
 ### Tests & Verification
 - `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
 - `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
 - `pnpm run test` → **153/153 tests pass successfully** (including 3 new approval gate integration tests)
+
+---
+
+## Task 6 Step 5 / Step 6 — Add Version History (Completed)
+
+### Files Created/Modified
+- `client/components/VersionHistory.tsx` — Created a dedicated panel displaying list of versions, active status, source (manual/agent), change summary, and creation timestamp.
+- `client/src/main.tsx` — Integrated the Version History component, added state management for version selection, and created the warning banner disabling draft sandboxes/mutation forms.
+- `server/routes/workflows.ts` — Updated the GET workflow API to return the published version ID to assist in state mapping.
+- `shared/ir.ts` — Added `publishedVersionId` field definition to standard `Workflow` interface.
+- `persistence/types.ts` & `persistence/versionRepository.ts` & `server/services/versionService.ts` — Extended database version schema and save routines to support tracking version source (`manual` | `agent`) and summary of changes.
+- `tests/versionHistory.test.ts` — Created integration tests to verify database sorting, source/summary mapping, and read-only older version inspection.
+
+### What Was Implemented
+- **Read-Only Version History Side Panel**: Displays chronological history list showing status badges (`published`/`draft`/`historical`), manual/agent tags, date, and description summary.
+- **Read-Only Older Version Inspection**: Clicking on a historical version loads its specific configuration from the database. The UI displays the graph layout of the selected historical version while disabling the draft sandbox and action inspector.
+- **Warning Banners**: Renders explicit warning banners notifying the user when they are inspecting non-current historical versions, keeping mutation disabled.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **155/155 tests pass successfully** (including 2 new version history integration tests)
 
 ## References
 
