@@ -161,20 +161,39 @@ export const DetectionComposer: React.FC<DetectionComposerProps> = ({ onDraftGen
           className="ft-btn ft-btn-primary" 
           onClick={handleDetect}
           disabled={loading}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--spacing-2)' }}
         >
+          {loading && <span className="ft-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>}
           {loading ? 'Detecting...' : 'Detect Workflow Draft'}
         </button>
       </div>
 
       {error && (
-        <div style={{ padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', color: 'var(--color-error)', fontSize: 'var(--font-size-xs)' }}>
-          <strong>Error:</strong> {error}
+        <div className="ft-alert ft-alert-error" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--spacing-2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+            <span>❌</span>
+            <strong>Detection Failed</strong>
+          </div>
+          <p style={{ margin: 0, fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>{error}</p>
+          <button className="ft-btn ft-btn-secondary" style={{ fontSize: 'var(--font-size-xs)', padding: '4px 8px', color: 'var(--color-error)', borderColor: 'var(--color-error-border)' }} onClick={handleDetect}>
+            🔄 Retry Detection
+          </button>
         </div>
       )}
 
       {result && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--spacing-4)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="ft-alert ft-alert-success" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
+            <span style={{ fontSize: '1.25rem' }}>✨</span>
+            <div style={{ flex: 1 }}>
+              <strong style={{ display: 'block' }}>Draft Generated Successfully!</strong>
+              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-success)', opacity: 0.9 }}>
+                Identified {result.workflow.nodes.length} process steps and {result.workflow.edges.length} connections.
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--spacing-1)' }}>
             <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)' }}>
               Detection Results
             </span>

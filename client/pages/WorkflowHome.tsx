@@ -67,29 +67,47 @@ export const WorkflowHome: React.FC<WorkflowHomeProps> = ({ onSelectWorkflow, on
           </h2>
 
           {loading && (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-12)', color: 'var(--color-text-secondary)' }}>
-              <div style={{ fontSize: 'var(--font-size-lg)' }}>Loading workflows...</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-12)', gap: 'var(--spacing-4)' }}>
+              <div className="ft-spinner"></div>
+              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--font-weight-medium)' }}>
+                Loading saved workflows...
+              </div>
             </div>
           )}
 
           {error && (
             <div className="ft-card" style={{ borderColor: 'var(--color-error-border)', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
-              <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Error Loading Workflows</h3>
-              <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>{error}</p>
+              <div style={{ display: 'flex', gap: 'var(--spacing-3)', alignItems: 'center' }}>
+                <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+                <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)' }}>Error Loading Workflows</h3>
+              </div>
+              <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>{error}</p>
               <div>
-                <button className="ft-btn ft-btn-secondary" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error-border)' }} onClick={fetchWorkflows}>
-                  Retry Connection
+                <button className="ft-btn ft-btn-secondary" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error-border)', fontWeight: 'var(--font-weight-medium)' }} onClick={fetchWorkflows}>
+                  🔄 Retry Connection
                 </button>
               </div>
             </div>
           )}
 
           {!loading && !error && workflows.length === 0 && (
-            <div className="ft-card" style={{ textAlign: 'center', padding: 'var(--spacing-12)' }}>
-              <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--color-text-primary)', margin: 0 }}>No Workflows Found</h3>
-              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-2)' }}>
-                There are no workflows seeded in the database. Please run the seeder script to initialize them.
-              </p>
+            <div className="ft-card" style={{ padding: 'var(--spacing-8)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-4)', borderStyle: 'dashed' }}>
+              <div style={{ fontSize: '2.5rem' }}>📁</div>
+              <div>
+                <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--color-text-primary)', fontWeight: 'var(--font-weight-bold)', margin: 0 }}>No Saved Workflows Found</h3>
+                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-2)', maxWidth: '400px', marginInline: 'auto' }}>
+                  The local database is currently empty. Run a seed command or generate a new process flow from requirement details.
+                </p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)', width: '100%', maxWidth: '380px', textAlign: 'left', backgroundColor: 'var(--color-bg-tertiary)', padding: 'var(--spacing-4)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', fontSize: 'var(--font-size-xs)' }}>
+                <span style={{ fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)' }}>Quick Actions:</span>
+                <span style={{ color: 'var(--color-text-secondary)' }}>
+                  👉 Use the <strong>Workflow Detector</strong> on the right to enter requirements.
+                </span>
+                <span style={{ color: 'var(--color-text-secondary)' }}>
+                  👉 Run <code style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '2px 4px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>pnpm seed</code> in your terminal.
+                </span>
+              </div>
             </div>
           )}
 

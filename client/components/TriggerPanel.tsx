@@ -195,16 +195,23 @@ export const TriggerPanel: React.FC<TriggerPanelProps> = ({ workflow, onRunSucce
         )}
 
         {error && (
-          <div style={{ padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', color: 'var(--color-error)', fontSize: 'var(--font-size-xs)', wordBreak: 'break-word' }}>
-            {error}
+          <div className="ft-alert ft-alert-error" style={{ fontSize: 'var(--font-size-xs)', margin: 0, display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-2)' }}>
+            <span>❌</span>
+            <div>
+              <strong>Validation / Run Error:</strong>
+              <div style={{ marginTop: '2px', color: 'var(--color-text-secondary)' }}>{error}</div>
+            </div>
           </div>
         )}
 
         {runId && (
-          <div style={{ padding: 'var(--spacing-3)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', color: 'var(--color-success)', fontSize: 'var(--font-size-xs)' }}>
-            <strong>Run Triggered successfully!</strong>
-            <div style={{ marginTop: '4px', fontFamily: 'monospace' }}>
-              Run ID: {runId}
+          <div className="ft-alert ft-alert-success" style={{ fontSize: 'var(--font-size-xs)', margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+            <span>🚀</span>
+            <div>
+              <strong>Run Triggered successfully!</strong>
+              <div style={{ marginTop: '2px', fontFamily: 'monospace' }}>
+                Run ID: {runId}
+              </div>
             </div>
           </div>
         )}
@@ -213,8 +220,9 @@ export const TriggerPanel: React.FC<TriggerPanelProps> = ({ workflow, onRunSucce
           type="submit" 
           className="ft-btn ft-btn-primary" 
           disabled={loading}
-          style={{ width: '100%', marginTop: 'var(--spacing-2)' }}
+          style={{ width: '100%', marginTop: 'var(--spacing-2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--spacing-2)' }}
         >
+          {loading && <span className="ft-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>}
           {loading ? 'Executing Run...' : 'Execute Manual Run'}
         </button>
       </form>

@@ -39,8 +39,16 @@ const App = () => {
   const [isApproved, setIsApproved] = useState<boolean>(false);
   const [latestVersionNumber, setLatestVersionNumber] = useState<number | null>(null);
   const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState<number>(0);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const handleBack = () => {
     setSelectedWorkflowId(null);
@@ -56,6 +64,7 @@ const App = () => {
     setPublishError(null);
     setIsApproved(false);
     setLatestVersionNumber(null);
+    setSuccessMessage(null);
   };
 
   useEffect(() => {
@@ -210,7 +219,7 @@ const App = () => {
       setViewMode('draft');
       setIsApproved(false);
       setHistoryRefreshTrigger(prev => prev + 1);
-      alert(`Draft version ${newWf.version} saved successfully!`);
+      setSuccessMessage(`Draft version ${newWf.version} saved successfully!`);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -245,7 +254,7 @@ const App = () => {
       setViewMode('published');
       setIsApproved(false);
       setHistoryRefreshTrigger(prev => prev + 1);
-      alert(`Workflow version ${newWf.version} published successfully!`);
+      setSuccessMessage(`Workflow version ${newWf.version} published successfully!`);
     } catch (err) {
       setPublishError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -319,10 +328,30 @@ const App = () => {
       </nav>
 
       <main style={{ minHeight: 'calc(100vh - 70px)' }}>
+        {successMessage && (
+          <div style={{ maxWidth: '1200px', margin: 'var(--spacing-4) auto 0 auto', padding: '0 var(--spacing-6)' }}>
+            <div className="ft-alert ft-alert-success" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                <span>✅</span>
+                <strong>{successMessage}</strong>
+              </div>
+              <button 
+                onClick={() => setSuccessMessage(null)}
+                style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 'var(--font-size-base)', fontWeight: 'bold' }}
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
+
         {!selectedWorkflowId && !activeDraft ? (
           <WorkflowHome 
             onSelectWorkflow={(id) => setSelectedWorkflowId(id)}
-            onDraftGenerated={(draft) => setActiveDraft(draft)}
+            onDraftGenerated={(draft) => {
+              setActiveDraft(draft);
+              setSuccessMessage('Draft generated and loaded into interactive sandbox.');
+            }}
           />
         ) : activeDraft ? (
           <div style={{ padding: 'var(--spacing-6)', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
@@ -357,18 +386,24 @@ const App = () => {
         ) : (
           <div style={{ padding: 'var(--spacing-6)', maxWidth: '1200px', margin: '0 auto' }}>
             {loadingWorkflow && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-12)', color: 'var(--color-text-secondary)' }}>
-                <div style={{ fontSize: 'var(--font-size-lg)' }}>Loading workflow details...</div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-12)', gap: 'var(--spacing-4)' }}>
+                <div className="ft-spinner"></div>
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--font-weight-medium)' }}>
+                  Loading workflow details...
+                </div>
               </div>
             )}
 
             {errorWorkflow && (
               <div className="ft-card" style={{ borderColor: 'var(--color-error-border)', backgroundColor: 'var(--color-error-bg)', color: 'var(--color-error)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
-                <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Error Loading Workflow</h3>
-                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>{errorWorkflow}</p>
+                <div style={{ display: 'flex', gap: 'var(--spacing-3)', alignItems: 'center' }}>
+                  <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+                  <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)' }}>Error Loading Workflow</h3>
+                </div>
+                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>{errorWorkflow}</p>
                 <div>
-                  <button className="ft-btn ft-btn-secondary" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error-border)' }} onClick={() => setSelectedWorkflowId(selectedWorkflowId)}>
-                    Retry
+                  <button className="ft-btn ft-btn-secondary" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error-border)', fontWeight: 'var(--font-weight-medium)' }} onClick={() => setSelectedWorkflowId(selectedWorkflowId)}>
+                    🔄 Retry Loading
                   </button>
                 </div>
               </div>
@@ -537,33 +572,45 @@ const App = () => {
                             </>
                           ) : (
                             selectedWorkflow.status === 'draft' && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)' }}>
-                                {validation.success && (
-                                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
-                                    <input 
-                                      type="checkbox" 
-                                      checked={isApproved} 
-                                      onChange={(e) => {
-                                        setIsApproved(e.target.checked);
-                                      }} 
-                                      style={{ cursor: 'pointer' }}
-                                    />
-                                    Approve draft
-                                  </label>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--spacing-2)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)' }}>
+                                  {validation.success && (
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+                                      <input 
+                                        type="checkbox" 
+                                        checked={isApproved} 
+                                        onChange={(e) => {
+                                          setIsApproved(e.target.checked);
+                                        }} 
+                                        style={{ cursor: 'pointer' }}
+                                      />
+                                      Approve draft
+                                    </label>
+                                  )}
+                                  <button 
+                                    className="ft-btn ft-btn-primary" 
+                                    onClick={handlePublishWorkflow}
+                                    disabled={publishing || !validation.success || !isApproved}
+                                    style={{ 
+                                      backgroundColor: (validation.success && isApproved) ? 'var(--color-success)' : 'var(--color-bg-secondary)', 
+                                      borderColor: (validation.success && isApproved) ? 'var(--color-success-border)' : 'var(--color-border)',
+                                      color: (validation.success && isApproved) ? 'white' : 'var(--color-text-secondary)',
+                                      cursor: (validation.success && isApproved) ? 'pointer' : 'not-allowed'
+                                    }}
+                                  >
+                                    {publishing ? 'Publishing...' : 'Approve & Publish Draft'}
+                                  </button>
+                                </div>
+                                {!validation.success && (
+                                  <span style={{ fontSize: '11px', color: 'var(--color-error)', fontStyle: 'italic' }}>
+                                    ⚠️ Cannot publish: Resolve validation blockers above first.
+                                  </span>
                                 )}
-                                <button 
-                                  className="ft-btn ft-btn-primary" 
-                                  onClick={handlePublishWorkflow}
-                                  disabled={publishing || !validation.success || !isApproved}
-                                  style={{ 
-                                    backgroundColor: (validation.success && isApproved) ? 'var(--color-success)' : 'var(--color-bg-secondary)', 
-                                    borderColor: (validation.success && isApproved) ? 'var(--color-success-border)' : 'var(--color-border)',
-                                    color: (validation.success && isApproved) ? 'white' : 'var(--color-text-secondary)',
-                                    cursor: (validation.success && isApproved) ? 'pointer' : 'not-allowed'
-                                  }}
-                                >
-                                  {publishing ? 'Publishing...' : 'Approve & Publish Draft'}
-                                </button>
+                                {validation.success && !isApproved && (
+                                  <span style={{ fontSize: '11px', color: 'var(--color-warning)', fontStyle: 'italic' }}>
+                                    ⚠️ Check &apos;Approve draft&apos; above to publish.
+                                  </span>
+                                )}
                               </div>
                             )
                           )}
