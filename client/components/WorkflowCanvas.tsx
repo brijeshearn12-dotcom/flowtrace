@@ -136,7 +136,7 @@ const FitViewUpdater: React.FC<{ nodes: RFNode[]; workflowId: string }> = ({ nod
 
     lastWorkflowId.current = workflowId;
     let retry = 0;
-    let timer: any;
+    const timers: any[] = [];
 
     const tryFitView = () => {
       const container = document.querySelector('.react-flow');
@@ -145,17 +145,19 @@ const FitViewUpdater: React.FC<{ nodes: RFNode[]; workflowId: string }> = ({ nod
 
       if ((width === 0 || height === 0) && retry < 20) {
         retry += 1;
-        timer = setTimeout(tryFitView, 100);
+        timers.push(setTimeout(tryFitView, 100));
       } else {
         fitView({ padding: 0.2 });
         // Double-fit after rendering to ensure nodes are measured and laid out correctly
-        setTimeout(() => fitView({ padding: 0.2 }), 200);
-        setTimeout(() => fitView({ padding: 0.2 }), 500);
+        timers.push(setTimeout(() => fitView({ padding: 0.2 }), 200));
+        timers.push(setTimeout(() => fitView({ padding: 0.2 }), 500));
       }
     };
 
-    timer = setTimeout(tryFitView, 100);
-    return () => clearTimeout(timer);
+    timers.push(setTimeout(tryFitView, 100));
+    return () => {
+      timers.forEach(t => clearTimeout(t));
+    };
   }, [nodes.length, workflowId, fitView]);
   return null;
 };
@@ -197,7 +199,9 @@ interface WorkflowCanvasProps {
   onNodeSelect?: (node: FTNode | null) => void;
 }
 
-export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepStatuses = {}, onNodeSelect }) => {
+const EMPTY_STATUSES: Record<string, any> = {};
+
+export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepStatuses = EMPTY_STATUSES, onNodeSelect }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
