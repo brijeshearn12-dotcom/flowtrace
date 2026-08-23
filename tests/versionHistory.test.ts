@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { connectDB, closeDB, getDb } from '../server/db';
 import { COLLECTIONS, WorkflowRepository, VersionRepository } from '../persistence';
 import { VersionService } from '../server/services/versionService';
-import { Trigger, Node, Edge } from '../shared/ir';
+import { Trigger, Node, Edge, Workflow } from '../shared/ir';
 import express from 'express';
 import { Server } from 'http';
 import workflowsRouter from '../server/routes/workflows';
@@ -99,7 +99,7 @@ describe('Version History API and Safety Tests', () => {
     const res = await fetch(`http://localhost:${port}/api/workflows/wf_history_test/history`);
     expect(res.status).toBe(200);
 
-    const history = (await res.json()) as any[];
+    const history = (await res.json()) as Array<{ version: number; source: string; summary: string; createdAt: string }>;
     expect(history.length).toBe(2);
 
     // Sort by version descending just in case (the API should already do this)
@@ -146,17 +146,17 @@ describe('Version History API and Safety Tests', () => {
     const res = await fetch(`http://localhost:${port}/api/workflows/wf_history_test?version=1`);
     expect(res.status).toBe(200);
 
-    const v1Workflow = (await res.json()) as any;
+    const v1Workflow = (await res.json()) as Workflow;
     expect(v1Workflow.version).toBe(1);
-    expect(v1Workflow.nodes[0].inputs.channel).toBe('#ops');
+    expect((v1Workflow.nodes[0].inputs as Record<string, string>).channel).toBe('#ops');
 
     // Fetch Version 2 details
     const res2 = await fetch(`http://localhost:${port}/api/workflows/wf_history_test?version=2`);
     expect(res2.status).toBe(200);
 
-    const v2Workflow = (await res2.json()) as any;
+    const v2Workflow = (await res2.json()) as Workflow;
     expect(v2Workflow.version).toBe(2);
-    expect(v2Workflow.nodes[0].inputs.channel).toBe('#billing');
+    expect((v2Workflow.nodes[0].inputs as Record<string, string>).channel).toBe('#billing');
 
     // Verify database state pointers are correct (version 2 is current published, version 1 remains intact)
     const wf = await WorkflowRepository.get('wf_history_test');

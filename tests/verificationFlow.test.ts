@@ -72,7 +72,7 @@ describe('Task 6 - Safety Flow Integration Verification', () => {
     if (!isDbAvailable) return;
 
     // STEP 1 & 2: Create workflow and edit draft manually, verifying only the draft changes
-    const { workflow: wfInit, version: v1 } = await VersionService.createWorkflow(
+    const { workflow: wfInit } = await VersionService.createWorkflow(
       'wf_verif',
       'Verification Flow',
       trigger,
@@ -166,7 +166,7 @@ describe('Task 6 - Safety Flow Integration Verification', () => {
     // STEP 10: Open version history and verify previous versions remain unchanged
     const historyRes = await fetch(`http://localhost:${port}/api/workflows/wf_verif/history`);
     expect(historyRes.status).toBe(200);
-    const history = (await historyRes.json()) as any[];
+    const history = (await historyRes.json()) as Array<{ version: number; nodes?: unknown[] }>;
     expect(history.length).toBe(3); // versions 1, 2, and 3 exist
 
     // Verify version 1 document is untouched in database
