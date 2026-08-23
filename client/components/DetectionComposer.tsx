@@ -86,10 +86,6 @@ export const DetectionComposer: React.FC<DetectionComposerProps> = ({ onDraftGen
 
       const data: DetectionResult = await res.json();
       setResult(data);
-
-      if (data.success && onDraftGenerated) {
-        onDraftGenerated(data.workflow);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -250,6 +246,17 @@ export const DetectionComposer: React.FC<DetectionComposerProps> = ({ onDraftGen
               </div>
             </div>
           </div>
+          {onDraftGenerated && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--spacing-2)' }}>
+              <button 
+                className="ft-btn ft-btn-primary" 
+                style={{ fontSize: 'var(--font-size-xs)', padding: '6px 12px' }}
+                onClick={() => onDraftGenerated(result.workflow)}
+              >
+                Inspect Visual Graph &rarr;
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
