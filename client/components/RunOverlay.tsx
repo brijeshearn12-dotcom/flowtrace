@@ -20,9 +20,19 @@ export const RunOverlay: React.FC<RunOverlayProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const onStepStatusesChangeRef = React.useRef(onStepStatusesChange);
+  useEffect(() => {
+    onStepStatusesChangeRef.current = onStepStatusesChange;
+  }, [onStepStatusesChange]);
+
+  const workflowRef = React.useRef(workflow);
+  useEffect(() => {
+    workflowRef.current = workflow;
+  }, [workflow]);
+
   useEffect(() => {
     let active = true;
-    let timerId: ReturnType<typeof setTimeout>;
+    let timerId: ReturnType<typeof setTimeout> | null = null;
 
     const fetchRunData = async () => {
       try {
@@ -45,15 +55,18 @@ export const RunOverlay: React.FC<RunOverlayProps> = ({
         setError(null);
         setLoading(false);
 
-        // Derive current step statuses and notify parent component
-        if (onStepStatusesChange) {
+        // Derive current step statuses and notify parent component via ref
+        const currentCallback = onStepStatusesChangeRef.current;
+        const currentWorkflow = workflowRef.current;
+
+        if (currentCallback && currentWorkflow) {
           const stepStatuses: Record<string, 'pending' | 'running' | 'success' | 'failed' | 'skipped'> = {};
 
           // Initialize all nodes to pending
-          workflow.nodes.forEach((n) => {
+          currentWorkflow.nodes.forEach((n) => {
             stepStatuses[n.id] = 'pending';
           });
-          stepStatuses[workflow.trigger.id] = 'success'; // trigger node is always success once running starts
+          stepStatuses[currentWorkflow.trigger.id] = 'success'; // trigger node is always success once running starts
 
           // Set statuses of completed steps
           if (runData.results) {
@@ -73,10 +86,10 @@ export const RunOverlay: React.FC<RunOverlayProps> = ({
             }
           });
 
-          onStepStatusesChange(stepStatuses);
+          currentCallback(stepStatuses);
         }
 
-        // Stop polling if we reached a terminal run state
+        // Terminal run states: success, failed, aborted -> stop polling immediately
         const isTerminal =
           runData.status === 'success' ||
           runData.status === 'failed' ||
@@ -86,8 +99,10 @@ export const RunOverlay: React.FC<RunOverlayProps> = ({
           return;
         }
 
-        // Continue polling every 500ms for smooth live updates
-        timerId = setTimeout(fetchRunData, 500);
+        // Only schedule next poll if still active and not terminal
+        if (active) {
+          timerId = setTimeout(fetchRunData, 500);
+        }
       } catch (err) {
         if (!active) return;
         setError(err instanceof Error ? err.message : String(err));
@@ -99,9 +114,11 @@ export const RunOverlay: React.FC<RunOverlayProps> = ({
 
     return () => {
       active = false;
-      clearTimeout(timerId);
+      if (timerId !== null) {
+        clearTimeout(timerId);
+      }
     };
-  }, [runId, workflow, onStepStatusesChange]);
+  }, [runId]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

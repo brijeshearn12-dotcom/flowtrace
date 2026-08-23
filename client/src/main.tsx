@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 import '../styles/tokens.css';
 import { WorkflowHome } from '../pages/WorkflowHome';
@@ -21,6 +21,13 @@ const App = () => {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [stepStatuses, setStepStatuses] = useState<Record<string, 'pending' | 'running' | 'success' | 'failed' | 'skipped'>>({});
+
+  const handleStepStatusesChange = useCallback(
+    (statuses: Record<string, 'pending' | 'running' | 'success' | 'failed' | 'skipped'>) => {
+      setStepStatuses(statuses);
+    },
+    []
+  );
 
   // Draft and edit states
   const [localDraft, setLocalDraft] = useState<Workflow | null>(null);
@@ -573,7 +580,7 @@ const App = () => {
                 runId={activeRunId} 
                 workflow={selectedWorkflow} 
                 onClose={() => setActiveRunId(null)}
-                onStepStatusesChange={(statuses) => setStepStatuses(statuses)}
+                onStepStatusesChange={handleStepStatusesChange}
               />
             )}
           </div>
