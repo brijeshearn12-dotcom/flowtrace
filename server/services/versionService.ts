@@ -300,4 +300,70 @@ export class VersionService {
 
     return updatedWorkflow;
   }
+
+  /**
+   * Deletes a version of a workflow.
+   */
+  static async deleteVersion(workflowId: string, versionNumber: number): Promise<WorkflowDocument> {
+    const workflow = await WorkflowRepository.get(workflowId);
+    if (!workflow) {
+      throw new Error(`Workflow with ID ${workflowId} not found`);
+    }
+
+    const versionDoc = await VersionRepository.getByVersion(workflowId, versionNumber);
+    if (!versionDoc) {
+      throw new Error(`Workflow version ${versionNumber} for workflow ${workflowId} not found`);
+    }
+
+    // Get all versions to check count and find fallback version
+    const allVersions = await VersionRepository.list(workflowId);
+    if (allVersions.length <= 1) {
+      throw new Error('Cannot delete the only version of a workflow.');
+    }
+
+    // Delete the version
+    const deleted = await VersionRepository.delete(workflowId, versionNumber);
+    if (!deleted) {
+      throw new Error(`Failed to delete version ${versionNumber}`);
+    }
+
+    let updatedFields: Partial<Omit<WorkflowDocument, 'id' | 'createdAt'>> = {};
+    let needsUpdate = false;
+
+    if (workflow.publishedVersionId === versionDoc.id) {
+      updatedFields.publishedVersionId = null;
+      updatedFields.status = 'draft';
+      needsUpdate = true;
+    }
+
+    // If we deleted the latest version, we need to update the workflow header
+    if (workflow.latestVersion === versionNumber) {
+      // Find the next highest version remaining
+      const remainingVersions = allVersions
+        .filter(v => v.version !== versionNumber)
+        .sort((a, b) => b.version - a.version);
+      
+      const newLatestVersion = remainingVersions[0];
+      updatedFields.latestVersion = newLatestVersion.version;
+      
+      const currentPublishedId = updatedFields.publishedVersionId !== undefined 
+        ? updatedFields.publishedVersionId 
+        : workflow.publishedVersionId;
+
+      // Determine new status based on whether newLatestVersion is the published version
+      const isNewLatestPublished = currentPublishedId === newLatestVersion.id && currentPublishedId !== null;
+      updatedFields.status = isNewLatestPublished ? 'published' : 'draft';
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      const updatedWorkflow = await WorkflowRepository.update(workflowId, updatedFields);
+      if (!updatedWorkflow) {
+        throw new Error(`Failed to update workflow ${workflowId} header after deleting version`);
+      }
+      return updatedWorkflow;
+    }
+
+    return workflow;
+  }
 }

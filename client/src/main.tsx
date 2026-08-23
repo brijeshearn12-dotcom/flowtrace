@@ -307,6 +307,40 @@ const App = () => {
       }
     }
   };
+  const handleVersionDeleted = async (deletedVersionNumber: number) => {
+    setHistoryRefreshTrigger(prev => prev + 1);
+    setSuccessMessage(`Version ${deletedVersionNumber} deleted successfully!`);
+    
+    // If the deleted version was the currently active/selected version, reload the workflow
+    if (selectedWorkflow && selectedWorkflow.version === deletedVersionNumber) {
+      try {
+        const res = await fetch(`/api/workflows/${selectedWorkflow.id}`);
+        if (!res.ok) {
+          throw new Error('Failed to reload workflow after version deletion');
+        }
+        const data: Workflow = await res.json();
+        setSelectedWorkflow(data);
+        setLocalDraft(data);
+        setLatestVersionNumber(data.version);
+        setViewMode(data.status === 'published' ? 'published' : 'draft');
+      } catch (err) {
+        setErrorWorkflow(err instanceof Error ? err.message : String(err));
+      }
+    } else {
+      // Even if not the selected version, update latestVersionNumber if we deleted the latest
+      if (latestVersionNumber === deletedVersionNumber) {
+        try {
+          const res = await fetch(`/api/workflows/${selectedWorkflow?.id}`);
+          if (res.ok) {
+            const data: Workflow = await res.json();
+            setLatestVersionNumber(data.version);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  };
 
   const validation = viewMode === 'draft' && localDraft
     ? validateWorkflow(localDraft)
@@ -517,6 +551,7 @@ const App = () => {
                         publishedVersionId={selectedWorkflow.publishedVersionId || null}
                         workflowStatus={selectedWorkflow.status}
                         onSelectVersion={handleSelectVersion}
+                        onVersionDeleted={handleVersionDeleted}
                         refreshTrigger={historyRefreshTrigger}
                       />
                     </div>

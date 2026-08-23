@@ -19,6 +19,7 @@ interface VersionHistoryProps {
   publishedVersionId: string | null;
   workflowStatus: string;
   onSelectVersion: (versionNumber: number) => void;
+  onVersionDeleted?: (versionNumber: number) => void;
   refreshTrigger?: number;
 }
 
@@ -28,6 +29,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
   publishedVersionId,
   workflowStatus,
   onSelectVersion,
+  onVersionDeleted,
   refreshTrigger = 0
 }) => {
   const [versions, setVersions] = useState<VersionItem[]>([]);
@@ -96,9 +98,47 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2)', flexWrap: 'wrap', gap: 'var(--spacing-1)' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-primary)' }}>
-                    Version {ver.version}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-primary)' }}>
+                      Version {ver.version}
+                    </span>
+                    {versions.length > 1 && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (confirm(`Are you sure you want to delete Version ${ver.version}?`)) {
+                            try {
+                              const res = await fetch(`/api/workflows/${workflowId}/versions/${ver.version}`, {
+                                method: 'DELETE',
+                              });
+                              if (!res.ok) {
+                                const data = await res.json();
+                                throw new Error(data.error || 'Failed to delete version');
+                              }
+                              onVersionDeleted?.(ver.version);
+                            } catch (err) {
+                              alert(err instanceof Error ? err.message : String(err));
+                            }
+                          }
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--color-error)',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          padding: '0 var(--spacing-1)',
+                          marginLeft: 'var(--spacing-1)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                        title="Delete this version"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
                   <div style={{ display: 'flex', gap: 'var(--spacing-1)', alignItems: 'center' }}>
                     <span className={`ft-badge ${
                       status === 'published' ? 'ft-badge-success' :

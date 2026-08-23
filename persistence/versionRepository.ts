@@ -66,4 +66,9 @@ export class VersionRepository {
       publishedVersionId: versionId,
     });
   }
+
+  static async delete(workflowId: string, versionNumber: number): Promise<boolean> {
+    const result = await this.getCollection().deleteOne({ workflowId, version: versionNumber });
+    return (result.deletedCount || 0) > 0;
+  }
 }

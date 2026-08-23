@@ -306,5 +306,31 @@ router.post('/:id/agent-edit', async (req: Request, res: Response) => {
   }
 });
 
+// DELETE workflow version: DELETE /api/workflows/:id/versions/:versionNumber
+router.delete('/:id/versions/:versionNumber', async (req: Request, res: Response) => {
+  try {
+    const { id, versionNumber } = req.params;
+    const parsedVersion = parseInt(versionNumber, 10);
+    if (isNaN(parsedVersion)) {
+      return res.status(400).json({ error: 'Invalid version number' });
+    }
+
+    const updatedWorkflow = await VersionService.deleteVersion(id, parsedVersion);
+    return res.json({
+      success: true,
+      workflow: {
+        id: updatedWorkflow.id,
+        version: updatedWorkflow.latestVersion,
+        status: updatedWorkflow.status,
+        createdAt: updatedWorkflow.createdAt,
+        updatedAt: updatedWorkflow.updatedAt
+      }
+    });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return res.status(400).json({ error: msg });
+  }
+});
+
 export default router;
 
