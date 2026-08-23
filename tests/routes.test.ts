@@ -172,7 +172,7 @@ describe('Workflow Route API Integration Tests', () => {
     expect(patchRes.status).toBe(200);
 
     // 3. Publish the valid draft
-    const publishRes = await fetch(`http://localhost:${port}/api/workflows/wf_route_test/publish`, {
+    const publishRes = await fetch(`http://localhost:${port}/api/workflows/wf_route_test/publish?baseVersion=2`, {
       method: 'POST'
     });
     expect(publishRes.status).toBe(200);

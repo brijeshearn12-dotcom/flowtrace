@@ -118,7 +118,16 @@ router.post('/:id/publish', async (req: Request, res: Response) => {
       return res.status(404).json({ error: `Workflow with ID "${id}" not found` });
     }
 
-    const { workflow, version } = await VersionService.publishVersion(id, wf.latestVersion);
+    const baseVersionStr = req.query.baseVersion || req.headers['x-base-version'] || req.body.baseVersion;
+    if (!baseVersionStr) {
+      return res.status(400).json({ error: 'baseVersion parameter is required' });
+    }
+    const baseVersion = parseInt(String(baseVersionStr), 10);
+    if (isNaN(baseVersion)) {
+      return res.status(400).json({ error: 'Invalid baseVersion parameter' });
+    }
+
+    const { workflow, version } = await VersionService.publishVersion(id, baseVersion);
     return res.json({
       success: true,
       workflow: {

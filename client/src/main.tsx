@@ -8,6 +8,8 @@ import { TriggerPanel } from '../components/TriggerPanel';
 import { RunOverlay } from '../components/RunOverlay';
 import { PatchDiff } from '../components/PatchDiff';
 import { Workflow, Node } from '../../shared/ir';
+import { validateWorkflow } from '../../shared/validator';
+
 
 const App = () => {
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
@@ -26,6 +28,8 @@ const App = () => {
   const [publishing, setPublishing] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [isApproved, setIsApproved] = useState<boolean>(false);
+
 
   const handleBack = () => {
     setSelectedWorkflowId(null);
@@ -39,6 +43,7 @@ const App = () => {
     setViewMode('published');
     setSaveError(null);
     setPublishError(null);
+    setIsApproved(false);
   };
 
   useEffect(() => {
@@ -54,6 +59,7 @@ const App = () => {
     setViewMode('published');
     setSaveError(null);
     setPublishError(null);
+    setIsApproved(false);
 
     fetch(`/api/workflows/${selectedWorkflowId}`)
       .then((res) => {
@@ -187,6 +193,7 @@ const App = () => {
       setSelectedWorkflow(newWf);
       setLocalDraft(newWf);
       setViewMode('draft');
+      setIsApproved(false);
       alert(`Draft version ${newWf.version} saved successfully!`);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : String(err));
@@ -201,7 +208,7 @@ const App = () => {
     setPublishError(null);
 
     try {
-      const res = await fetch(`/api/workflows/${selectedWorkflow.id}/publish`, {
+      const res = await fetch(`/api/workflows/${selectedWorkflow.id}/publish?baseVersion=${selectedWorkflow.version}`, {
         method: 'POST',
       });
 
@@ -219,6 +226,7 @@ const App = () => {
       setSelectedWorkflow(newWf);
       setLocalDraft(newWf);
       setViewMode('published');
+      setIsApproved(false);
       alert(`Workflow version ${newWf.version} published successfully!`);
     } catch (err) {
       setPublishError(err instanceof Error ? err.message : String(err));
@@ -242,7 +250,12 @@ const App = () => {
 
   const handleDiscardChanges = () => {
     setLocalDraft(selectedWorkflow);
+    setIsApproved(false);
   };
+
+  const validation = viewMode === 'draft' && localDraft
+    ? validateWorkflow(localDraft)
+    : { success: true, errors: [] as Array<{ path: string; message: string }> };
 
   return (
     <div>
@@ -423,44 +436,78 @@ const App = () => {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button className="ft-btn ft-btn-secondary" onClick={handleBack}>
-                      Back to Dashboard
-                    </button>
-
-                    {viewMode === 'draft' && (
-                      <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
-                        {hasUnsavedChanges ? (
-                          <>
-                            <button 
-                              className="ft-btn ft-btn-secondary" 
-                              onClick={handleDiscardChanges}
-                              style={{ color: 'var(--color-error)', borderColor: 'var(--color-error-border)' }}
-                            >
-                              Discard Changes
-                            </button>
-                            <button 
-                              className="ft-btn ft-btn-primary" 
-                              onClick={handleSaveDraft}
-                              disabled={saving}
-                            >
-                              {saving ? 'Saving...' : 'Save Draft'}
-                            </button>
-                          </>
-                        ) : (
-                          selectedWorkflow.status === 'draft' && (
-                            <button 
-                              className="ft-btn ft-btn-primary" 
-                              onClick={handlePublishWorkflow}
-                              disabled={publishing}
-                              style={{ backgroundColor: 'var(--color-success)', borderColor: 'var(--color-success-border)' }}
-                            >
-                              {publishing ? 'Publishing...' : 'Publish Draft Version'}
-                            </button>
-                          )
-                        )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)', width: '100%', marginTop: 'var(--spacing-4)' }}>
+                    {/* Validation Error List */}
+                    {viewMode === 'draft' && !validation.success && (
+                      <div style={{ padding: 'var(--spacing-4)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', color: 'var(--color-error)' }}>
+                        <h4 style={{ margin: '0 0 var(--spacing-2) 0', fontSize: 'var(--font-size-sm)', fontWeight: 'bold' }}>Validation Blockers:</h4>
+                        <ul style={{ margin: 0, paddingLeft: 'var(--spacing-4)', fontSize: 'var(--font-size-xs)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-1)' }}>
+                          {validation.errors.map((err, i) => (
+                            <li key={i}><strong>{err.path}:</strong> {err.message}</li>
+                          ))}
+                        </ul>
                       </div>
                     )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--spacing-4)' }}>
+                      <button className="ft-btn ft-btn-secondary" onClick={handleBack}>
+                        Back to Dashboard
+                      </button>
+
+                      {viewMode === 'draft' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
+                          {hasUnsavedChanges ? (
+                            <>
+                              <button 
+                                className="ft-btn ft-btn-secondary" 
+                                onClick={handleDiscardChanges}
+                                style={{ color: 'var(--color-error)', borderColor: 'var(--color-error-border)' }}
+                              >
+                                Discard Changes
+                              </button>
+                              <button 
+                                className="ft-btn ft-btn-primary" 
+                                onClick={handleSaveDraft}
+                                disabled={saving}
+                              >
+                                {saving ? 'Saving...' : 'Save Draft'}
+                              </button>
+                            </>
+                          ) : (
+                            selectedWorkflow.status === 'draft' && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)' }}>
+                                {validation.success && (
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+                                    <input 
+                                      type="checkbox" 
+                                      checked={isApproved} 
+                                      onChange={(e) => {
+                                        setIsApproved(e.target.checked);
+                                      }} 
+                                      style={{ cursor: 'pointer' }}
+                                    />
+                                    Approve draft
+                                  </label>
+                                )}
+                                <button 
+                                  className="ft-btn ft-btn-primary" 
+                                  onClick={handlePublishWorkflow}
+                                  disabled={publishing || !validation.success || !isApproved}
+                                  style={{ 
+                                    backgroundColor: (validation.success && isApproved) ? 'var(--color-success)' : 'var(--color-bg-secondary)', 
+                                    borderColor: (validation.success && isApproved) ? 'var(--color-success-border)' : 'var(--color-border)',
+                                    color: (validation.success && isApproved) ? 'white' : 'var(--color-text-secondary)',
+                                    cursor: (validation.success && isApproved) ? 'pointer' : 'not-allowed'
+                                  }}
+                                >
+                                  {publishing ? 'Publishing...' : 'Approve & Publish Draft'}
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

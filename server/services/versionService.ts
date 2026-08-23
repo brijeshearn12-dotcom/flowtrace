@@ -235,6 +235,16 @@ export class VersionService {
       throw new Error(`Workflow version ${versionNumber} for workflow ${workflowId} not found`);
     }
 
+    // Stale check
+    if (versionNumber !== workflow.latestVersion) {
+      throw new StaleVersionError('Workflow version is locked (published status) or edit is stale');
+    }
+
+    // Locked check
+    if (workflow.status === 'published') {
+      throw new StaleVersionError('Workflow version is locked (published status) or edit is stale');
+    }
+
     // Validate before publishing
     const tempWorkflowObj: Workflow = {
       id: workflowId,

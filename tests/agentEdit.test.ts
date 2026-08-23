@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { AgentEditService } from '../server/services/agentEditService';
-import { connectDB, closeDB, getDb } from '../server/db';
-import { WorkflowRepository, VersionRepository, COLLECTIONS } from '../persistence';
+import { connectDB, closeDB } from '../server/db';
+import { WorkflowRepository, VersionRepository } from '../persistence';
+import { AgentEditResponse } from '../shared/api';
 import { seedOrderPlaced } from '../seed/orderPlaced';
 import { seedAssetRequestApproval } from '../seed/assetRequestApproval';
 import express from 'express';
@@ -168,7 +169,7 @@ describe('Agent Edit Route API Integration Tests', () => {
     });
 
     expect(res.status).toBe(200);
-    const data = await res.json() as any;
+    const data = (await res.json()) as AgentEditResponse;
     expect(data.success).toBe(true);
     expect(data.explanation).toContain('slack notification');
     expect(data.patch.length).toBeGreaterThan(0);
@@ -194,7 +195,7 @@ describe('Agent Edit Route API Integration Tests', () => {
     });
 
     expect(res.status).toBe(200);
-    const data = await res.json() as any;
+    const data = (await res.json()) as AgentEditResponse;
     expect(data.success).toBe(false);
     expect(data.explanation).toContain('Warning: Unknown instruction');
     expect(data.warning).toBeDefined();
@@ -213,7 +214,7 @@ describe('Agent Edit Route API Integration Tests', () => {
     });
 
     expect(res.status).toBe(404);
-    const data = await res.json() as any;
+    const data = (await res.json()) as { error: string };
     expect(data.error).toContain('not found');
   });
 
@@ -227,7 +228,7 @@ describe('Agent Edit Route API Integration Tests', () => {
     });
 
     expect(res.status).toBe(400);
-    const data = await res.json() as any;
+    const data = (await res.json()) as { error: string };
     expect(data.error).toContain('Prompt string is required');
   });
 });
