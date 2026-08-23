@@ -148,6 +148,9 @@ const FitViewUpdater: React.FC<{ nodes: RFNode[]; workflowId: string }> = ({ nod
         timer = setTimeout(tryFitView, 100);
       } else {
         fitView({ padding: 0.2 });
+        // Double-fit after rendering to ensure nodes are measured and laid out correctly
+        setTimeout(() => fitView({ padding: 0.2 }), 200);
+        setTimeout(() => fitView({ padding: 0.2 }), 500);
       }
     };
 
@@ -294,6 +297,7 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepSt
 
     // 4. Calculate layout using Dagre
     const layouted = getLayoutedElements(rawNodes, rawEdges, 'LR');
+    console.log('[WorkflowCanvas] Setting nodes:', rawNodes.map(n => n.id), 'edges:', rawEdges.map(e => e.id));
     setNodes(layouted.nodes);
     setEdges(layouted.edges);
   }, [workflow, stepStatuses, setNodes, setEdges]);

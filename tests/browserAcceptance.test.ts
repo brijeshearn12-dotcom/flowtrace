@@ -120,6 +120,8 @@ test.beforeEach(async () => {
   page.on('console', msg => {
     if (msg.type() === 'error') {
       console.error(`[browser console ERROR] ${msg.text()}`);
+    } else {
+      console.log(`[browser console log] ${msg.text()}`);
     }
   });
   page.on('pageerror', err => {
@@ -206,6 +208,19 @@ test('Step 3 — Run detection and inspect the generated workflow', async () => 
   await waitForText('Detected Draft: wf_order_placed');
   await waitForText('Nodes (');
   await waitForText('Edges (');
+
+  // Click Inspect Visual Graph
+  await page.locator('button', { hasText: 'Inspect Visual Graph' }).click();
+
+  // Wait for the active draft layout to appear
+  await page.waitForFunction(
+    () => document.body.innerText.includes('Active NLP Detected Draft:'),
+    { timeout: NAV_TIMEOUT }
+  );
+
+  // Check if the node is present on the canvas
+  const nodeEl = page.locator('[data-id="order-created"]').first();
+  await nodeEl.waitFor({ state: 'visible', timeout: MEDIUM_WAIT });
 });
 
 test('Step 4 — Select a workflow node and verify the inspector', async () => {

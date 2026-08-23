@@ -385,6 +385,7 @@ const App = () => {
             onSelectWorkflow={(id) => setSelectedWorkflowId(id)}
             onDraftGenerated={(draft) => {
               setActiveDraft(draft);
+              setSelectedNode(null);
               setSuccessMessage('Draft generated and loaded into interactive sandbox.');
             }}
           />
