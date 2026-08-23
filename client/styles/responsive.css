@@ -1,0 +1,195 @@
+/* FlowTrace Responsive Layout
+ *
+ * Strategy: add breakpoint overrides for the named layout containers.
+ * All cosmetic/brand styles remain in tokens.css.
+ * No new dependencies required.
+ *
+ * Breakpoints:
+ *   Narrow (<= 768px)  — tablet portrait / phone landscape
+ *   Mobile (<= 480px)  — phone portrait
+ */
+
+/* ─── Prevent global horizontal overflow ─── */
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ─── Nav bar ─── */
+.ft-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+@media (max-width: 480px) {
+  .ft-nav {
+    padding: var(--spacing-3) var(--spacing-4);
+    gap: var(--spacing-2);
+  }
+
+  .ft-nav .ft-nav-title {
+    font-size: var(--font-size-base) !important;
+  }
+}
+
+/* ─── Page wrapper (shared by workflow view and activeDraft view) ─── */
+.ft-page-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ─── Two-column layout: canvas + side panel ─── */
+.ft-canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+  .ft-canvas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Canvas wrapper: give React Flow a reliable height ─── */
+.ft-canvas-wrapper {
+  min-width: 0;         /* allow grid children to shrink below their content size */
+  width: 100%;
+}
+
+/* ─── Side panel (inspector + trigger + history) ─── */
+.ft-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  min-width: 0;
+  width: 100%;
+}
+
+/* ─── Home page two-column layout: workflow list + detection composer ─── */
+.ft-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: var(--spacing-8);
+  align-items: flex-start;
+}
+
+@media (max-width: 960px) {
+  .ft-home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Action bar at the bottom of the workflow detail card ─── */
+.ft-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.ft-action-bar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .ft-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ft-action-bar-end {
+    justify-content: flex-end;
+  }
+
+  .ft-action-bar .ft-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─── Workflow header: title + badge row ─── */
+.ft-workflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.ft-workflow-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ft-workflow-header-left h2 {
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* ─── View mode tab bar ─── */
+.ft-tab-bar {
+  display: flex;
+  gap: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+/* ─── Home header: title + refresh button ─── */
+.ft-home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+}
+
+@media (max-width: 480px) {
+  .ft-home-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ft-home-header .ft-btn {
+    align-self: flex-start;
+  }
+}
+
+/* ─── Success alert inside content area ─── */
+.ft-success-banner {
+  max-width: 1200px;
+  margin: var(--spacing-4) auto 0 auto;
+  padding: 0 var(--spacing-6);
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .ft-success-banner {
+    padding: 0 var(--spacing-4);
+  }
+}
+
+/* ─── Scrollable overflow guard for code/mono blocks inside cards ─── */
+.ft-card pre,
+.ft-card code {
+  max-width: 100%;
+  overflow-x: auto;
+  word-break: break-all;
+}

@@ -44,8 +44,8 @@ export const WorkflowHome: React.FC<WorkflowHomeProps> = ({ onSelectWorkflow, on
   }, []);
 
   return (
-    <div style={{ padding: 'var(--spacing-6)', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-6)' }}>
+    <div style={{ padding: 'var(--spacing-6)', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box', width: '100%' }}>
+      <div className="ft-home-header">
         <div>
           <h1 style={{ fontSize: 'var(--font-size-xxl)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', margin: 0 }}>
             FlowTrace Workflows
@@ -59,7 +59,7 @@ export const WorkflowHome: React.FC<WorkflowHomeProps> = ({ onSelectWorkflow, on
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: 'var(--spacing-8)', alignItems: 'flex-start' }}>
+      <div className="ft-home-grid">
         {/* Left Column: Workflows list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
           <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', margin: 0 }}>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 import '../styles/tokens.css';
+import '../styles/responsive.css';
 import { WorkflowHome } from '../pages/WorkflowHome';
 import { WorkflowCanvas } from '../components/WorkflowCanvas';
 import { NodeInspector } from '../components/NodeInspector';
@@ -313,10 +314,10 @@ const App = () => {
 
   return (
     <div>
-      <nav style={{ backgroundColor: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', padding: 'var(--spacing-4) var(--spacing-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <nav className="ft-nav" style={{ backgroundColor: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)', padding: 'var(--spacing-4) var(--spacing-6)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
           <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-brand)' }}></div>
-          <span style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
+          <span className="ft-nav-title" style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
             FlowTrace
           </span>
         </div>
@@ -329,7 +330,7 @@ const App = () => {
 
       <main style={{ minHeight: 'calc(100vh - 70px)' }}>
         {successMessage && (
-          <div style={{ maxWidth: '1200px', margin: 'var(--spacing-4) auto 0 auto', padding: '0 var(--spacing-6)' }}>
+          <div className="ft-success-banner">
             <div className="ft-alert ft-alert-success" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
                 <span>✅</span>
@@ -367,11 +368,11 @@ const App = () => {
               </p>
 
               {/* Render visual graph canvas and Node inspector side by side */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-6)' }}>
-                <div style={{ flex: 1, minWidth: '350px' }}>
+              <div className="ft-canvas-grid">
+                <div className="ft-canvas-wrapper">
                   <WorkflowCanvas workflow={activeDraft} onNodeSelect={(node) => setSelectedNode(node)} />
                 </div>
-                <div style={{ width: '100%' }}>
+                <div className="ft-side-panel">
                   <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />
                 </div>
               </div>
@@ -412,8 +413,8 @@ const App = () => {
             {selectedWorkflow && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
                 <div className="ft-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-4)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                  <div className="ft-workflow-header">
+                    <div className="ft-workflow-header-left">
                       <h2 style={{ fontSize: 'var(--font-size-xl)', color: 'var(--color-text-primary)', margin: 0 }}>
                         Selected Workflow: <span style={{ color: 'var(--color-brand)' }}>{selectedWorkflow.id}</span>
                       </h2>
@@ -440,7 +441,7 @@ const App = () => {
 
                   {/* ViewMode Tabs (Only show if workflow is published at least once and we are on the latest version) */}
                   {selectedWorkflow.status === 'published' && selectedWorkflow.version === latestVersionNumber ? (
-                    <div style={{ display: 'flex', gap: 'var(--spacing-2)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-3)', marginBottom: 'var(--spacing-6)' }}>
+                    <div className="ft-tab-bar">
                       <button 
                         className={`ft-btn ${viewMode === 'published' ? 'ft-btn-primary' : 'ft-btn-secondary'}`}
                         onClick={() => {
@@ -465,7 +466,7 @@ const App = () => {
                       </button>
                     </div>
                   ) : selectedWorkflow.version !== latestVersionNumber ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-3)', marginBottom: 'var(--spacing-6)' }}>
+                    <div className="ft-tab-bar">
                       <span className="ft-badge ft-badge-warning" style={{ textTransform: 'uppercase', fontSize: '10px' }}>
                         Read-Only Inspection
                       </span>
@@ -476,15 +477,15 @@ const App = () => {
                   ) : null}
 
                   {/* Render visual graph canvas and Node inspector side by side */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-6)' }}>
-                    <div style={{ flex: 1, minWidth: '350px' }}>
+                  <div className="ft-canvas-grid">
+                    <div className="ft-canvas-wrapper">
                       <WorkflowCanvas 
                         workflow={viewMode === 'draft' && localDraft ? localDraft : selectedWorkflow} 
                         stepStatuses={stepStatuses} 
                         onNodeSelect={(node) => setSelectedNode(node)} 
                       />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', width: '100%' }}>
+                    <div className="ft-side-panel">
                       {viewMode === 'published' ? (
                         <TriggerPanel workflow={selectedWorkflow} onRunSuccess={(runId) => setActiveRunId(runId)} />
                       ) : (
@@ -546,13 +547,13 @@ const App = () => {
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--spacing-4)' }}>
+                    <div className="ft-action-bar">
                       <button className="ft-btn ft-btn-secondary" onClick={handleBack}>
                         Back to Dashboard
                       </button>
 
                       {viewMode === 'draft' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
+                        <div className="ft-action-bar-end">
                           {hasUnsavedChanges ? (
                             <>
                               <button 
