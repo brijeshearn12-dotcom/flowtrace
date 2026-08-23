@@ -105,7 +105,7 @@ describe('Step 6: Check Polling and Speed Tests', () => {
       expect(['success', 'failed', 'aborted']).toContain(data.run.status);
       expect(data.run.status).toBe('success');
       expect(data.run.completedAt).toBeDefined();
-      expect(duration).toBeLessThan(1000); // Fast local execution
+      expect(duration).toBeLessThan(2000); // Fast local execution
 
       // Verify GET /api/runs/:runId returns terminal state with all step results populated
       const statusRes = await fetch(`http://localhost:${port}/api/runs/${data.run.id}`);

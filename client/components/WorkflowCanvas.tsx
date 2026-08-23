@@ -10,6 +10,8 @@ import ReactFlow, {
   Position,
   Node as RFNode,
   Edge as RFEdge,
+  ReactFlowProvider,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Workflow, Node as FTNode } from '../../shared/ir';
@@ -122,6 +124,19 @@ const CustomWorkflowNode: React.FC<{ data: WorkflowNodeData }> = ({ data }) => {
 
 const nodeTypes = {
   workflowNode: CustomWorkflowNode,
+};
+
+const FitViewUpdater: React.FC<{ nodes: RFNode[] }> = ({ nodes }) => {
+  const { fitView } = useReactFlow();
+  useEffect(() => {
+    if (nodes.length > 0) {
+      const timer = setTimeout(() => {
+        fitView({ padding: 0.2 });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [nodes, fitView]);
+  return null;
 };
 
 const getLayoutedElements = (nodes: RFNode[], edges: RFEdge[], direction = 'LR') => {
@@ -266,23 +281,26 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepSt
   }, [workflow, stepStatuses, setNodes, setEdges]);
 
   return (
-    <div style={{ width: '100%', height: '500px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg-primary)', overflow: 'hidden' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.5}
-        maxZoom={1.5}
-      >
-        <Background color="var(--color-border)" gap={16} />
-        <Controls />
-        <MiniMap nodeStrokeWidth={3} zoomable pannable />
-      </ReactFlow>
-    </div>
+    <ReactFlowProvider>
+      <div style={{ width: '100%', height: '500px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', backgroundColor: 'var(--color-bg-primary)', overflow: 'hidden' }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
+          minZoom={0.5}
+          maxZoom={1.5}
+        >
+          <Background color="var(--color-border)" gap={16} />
+          <Controls />
+          <MiniMap nodeStrokeWidth={3} zoomable pannable />
+          <FitViewUpdater nodes={nodes} />
+        </ReactFlow>
+      </div>
+    </ReactFlowProvider>
   );
 };
