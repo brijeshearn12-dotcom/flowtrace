@@ -1008,6 +1008,29 @@ All core backend engine and API layers are now complete:
 - `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
 - `pnpm run test` → **159/159 tests pass successfully** (including 4 new fallback and conflict integration tests)
 
+---
+
+## Closure: Task 6 — Connect Editing + Safe Versions (Completed)
+
+### Files Created/Modified
+- `tests/verificationFlow.test.ts` — Created a dedicated safety lifecycle integration test validating manual draft updates, agent proposal generation, validation blocking, approval gates, immutable historical records, stale-version publish rejection, and history list persistence.
+
+### Verification Flow Checklist
+1. **Manual Node Editing**: Node property changes (label, operation inputs, conditions, failure policies) update only the sandbox draft (tested via `PATCH /api/workflows/:id`).
+2. **Safe Version Partition**: Database draft copies are isolated; version 1 remains unmodified.
+3. **Agent Proposal (Offline/No Keys)**: Determinstic phrase-matching returns reviewable patch proposals without altering database records or auto-publishing.
+4. **Patch Review (Diff)**: Proposed additions, updates, and removals are mapped cleanly.
+5. **Validation Gate Rejection**: Drafts containing cycles or invalid references return `422 Unprocessable Entity` on publication.
+6. **Approval & Publication Promotion**: Clean drafts explicitly marked as approved are promoted to active versions.
+7. **Immutable Records**: Creating new active versions increments version pointers while leaving previous published copies safe.
+8. **Stale Publish Protection**: Concurrency control blocks outdated publish requests with `409 Conflict`.
+9. **Version History Navigation**: Older versions are loaded dynamically for read-only inspection, hiding sandboxes/trigger panels.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run test` → **160/160 tests pass successfully** (including the new safety lifecycle verification suite)
+
 ## References
 
 [1]: /home/ubuntu/upload/Pasted_content.txt "Workflow Engine problem statement"
