@@ -126,16 +126,34 @@ const nodeTypes = {
   workflowNode: CustomWorkflowNode,
 };
 
-const FitViewUpdater: React.FC<{ nodes: RFNode[] }> = ({ nodes }) => {
+const FitViewUpdater: React.FC<{ nodes: RFNode[]; workflowId: string }> = ({ nodes, workflowId }) => {
   const { fitView } = useReactFlow();
+  const lastWorkflowId = React.useRef<string>('');
+
   useEffect(() => {
-    if (nodes.length > 0) {
-      const timer = setTimeout(() => {
+    if (nodes.length === 0) return;
+    if (lastWorkflowId.current === workflowId) return;
+
+    lastWorkflowId.current = workflowId;
+    let retry = 0;
+    let timer: any;
+
+    const tryFitView = () => {
+      const container = document.querySelector('.react-flow');
+      const width = container?.clientWidth || 0;
+      const height = container?.clientHeight || 0;
+
+      if ((width === 0 || height === 0) && retry < 20) {
+        retry += 1;
+        timer = setTimeout(tryFitView, 100);
+      } else {
         fitView({ padding: 0.2 });
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [nodes, fitView]);
+      }
+    };
+
+    timer = setTimeout(tryFitView, 100);
+    return () => clearTimeout(timer);
+  }, [nodes.length, workflowId, fitView]);
   return null;
 };
 
@@ -298,7 +316,7 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ workflow, stepSt
           <Background color="var(--color-border)" gap={16} />
           <Controls />
           <MiniMap nodeStrokeWidth={3} zoomable pannable />
-          <FitViewUpdater nodes={nodes} />
+          <FitViewUpdater nodes={nodes} workflowId={workflow.id} />
         </ReactFlow>
       </div>
     </ReactFlowProvider>
