@@ -16,7 +16,8 @@
     "test:watch": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& vitest --fileParallelism=false --maxWorkers=1 --exclude tests/browserAcceptance.test.ts\"",
     "test:browser": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& npx playwright test --config=playwright.config.ts\"",
     "test:browser:headed": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& npx playwright test --config=playwright.config.ts --headed\"",
-    "seed": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx seed/runSeeds.ts\""
+    "seed": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx seed/runSeeds.ts\"",
+    "db:reset": "tsx seed/resetDb.ts"
   },
   "dependencies": {
     "concurrently": "^8.2.2",

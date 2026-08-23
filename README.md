@@ -237,47 +237,82 @@ flowtrace/
 
 ## 🚀 Getting Started
 
-### Prerequisites
+Follow these simple, repeatable commands to get FlowTrace up and running.
 
-- Node.js 20+ (the repository uses Node’s `process.loadEnvFile` when available)
-- pnpm 8+
-- A MongoDB instance or MongoDB Atlas database
-
-### Clone and install
-
+### 1. Install Dependencies
 ```bash
-git clone https://github.com/brijeshearn12-dotcom/flowtrace.git
-cd flowtrace
 pnpm install
 ```
 
-### Configure the environment
+### 2. Start the Database
+FlowTrace requires MongoDB. You can start a local container using Docker:
+```bash
+docker compose up -d mongo
+```
+Alternatively, ensure a local `mongod` instance is running.
 
-Create a `.env` file in the repository root. Never commit database credentials.
-
+### 3. Configure the Environment
+Create a `.env` file in the root directory:
 ```env
-MONGODB_URI=your_mongodb_atlas_connection_string
+MONGODB_URI=mongodb://localhost:27017/flowtrace
 MONGODB_DB=flowtrace
 PORT=3001
+CLIENT_URL=http://localhost:5173
+FORMS_API_BASE_URL=http://localhost:3002
+LLM_ENABLED=false
 ```
 
-### Seed and run
-
+### 4. Seed the Database
+Seed the metadata catalog and the two demo workflows:
 ```bash
 pnpm seed
-pnpm dev
 ```
 
-`pnpm dev` starts the Express API on port `3001`, the Vite client, and the mock Forms API on port `3002` (unless `PORT` overrides a service’s port).
+### 5. Start the Application
+Start the backend, frontend, and local mock Forms API concurrently:
+```bash
+pnpm dev
+```
+Open `http://localhost:5173` in your browser.
+
+---
+
+## 🛠️ Developer Verification & Commands
+
+| Command | Action |
+|---|---|
+| `pnpm install` | Install all dependencies |
+| `pnpm seed` | Seed metadata and demo workflows |
+| `pnpm dev` | Run backend, client, and mock forms api |
+| `pnpm typecheck` | Run TypeScript compiler checks |
+| `pnpm lint` | Run ESLint static code analysis |
+| `pnpm test` | Run complete backend and integration test suite |
+| `pnpm test:browser` | Run Playwright browser acceptance tests |
+| `pnpm db:reset` | Reset all database collections safely (with confirmation) |
+
+### Safely Resetting Database Data
+To prevent accidental data destruction, running `pnpm db:reset` interactively prompts for confirmation:
+```bash
+pnpm db:reset
+# WARNING: This will drop/clear all FlowTrace collections. Are you sure? (y/N): 
+```
+For non-interactive environments (CI, automation), bypass the confirmation prompt by passing the `--yes` or `-y` flag:
+```bash
+pnpm db:reset --yes
+```
+
+---
 
 ## ✅ Verification
 
+Ensure your environment is fully healthy before pushing:
 ```bash
 pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
 ```
+
 
 The test suite covers schemas, graph validation, MongoDB connectivity and repositories, the version lifecycle, seeding, and the implemented workflow routes. To verify a running database connection manually, open `http://localhost:3001/health`; a successful response is `{ "status": "ok", "database": "connected" }`.
 

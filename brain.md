@@ -93,10 +93,10 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 `MONGODB_URI`, `MONGODB_DB`, `SERVER_PORT`, `CLIENT_URL`, `FORMS_API_BASE_URL`, `FORMS_API_TOKEN`, `LLM_ENABLED`, `LLM_MODEL`, and `LOG_LEVEL`. Never commit real secrets.
 
 ## Current Development Status
-Step 6 Check Polling and Speed complete. Verified strict polling termination upon terminal state, callback/ref stabilization in RunOverlay preventing redundant fetches, isolated Dagre graph layout computations, and sub-100ms API response latency. All 220 backend tests pass across 23 test files, and all 12 browser acceptance tests pass.
+Step 7 Create Clean-Start Script complete. Repeatable scripts added for starting, seeding, testing, linting, typechecking, and resetting the database. Documented clean-start commands in README.md. Safeguarded reset command to prompt for confirmation interactively. All 220 backend tests pass across 23 test files, and all 12 browser acceptance tests pass.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`), Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`), Task 6 Step 1: Add Draft State, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx`), Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx`), Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts`), Task 6 Step 4 (Step 5): Add Approval Gate, Task 6 Step 5 (Step 6): Add Version History (`client/components/VersionHistory.tsx`), Task 6 Step 6 (Step 7): Test Fallback and Conflict (`tests/fallbackConflict.test.ts`), Task 7 Step 1: Run Unit Tests — 160 tests passing, Task 7 Step 2: Run API Integration Tests (`tests/apiIntegration.test.ts`) — 176 tests passing, Task 7 Step 3: Run Browser Acceptance Tests (`tests/browserAcceptance.test.ts`) — 12 browser acceptance tests passing, Task Step 4: Test Invalid Inputs (`tests/invalidInputs.test.ts`) — 26 non-destructive safety tests, Task Step 5: Test Offline Fallback (`tests/offlineFallback.test.ts` & `docs/offline-runbook.md`) — 12 deterministic offline tests, **Task Step 6: Check Polling and Speed** (`tests/pollingSpeed.test.ts`, `client/components/RunOverlay.tsx`, `client/components/WorkflowCanvas.tsx`, `client/src/main.tsx`) — 6 tests verifying immediate terminal polling cessation, stabilized callback refs without redundant fetching, sub-100ms API latency, and per-call isolated Dagre layouts. All 220 backend tests pass across 23 test files.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`), Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`), Task 6 Step 1: Add Draft State, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx`), Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx`), Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts`), Task 6 Step 4 (Step 5): Add Approval Gate, Task 6 Step 5 (Step 6): Add Version History (`client/components/VersionHistory.tsx`), Task 6 Step 6 (Step 7): Test Fallback and Conflict (`tests/fallbackConflict.test.ts`), Task 7 Step 1: Run Unit Tests — 160 tests passing, Task 7 Step 2: Run API Integration Tests (`tests/apiIntegration.test.ts`) — 176 tests passing, Task 7 Step 3: Run Browser Acceptance Tests (`tests/browserAcceptance.test.ts`) — 12 browser acceptance tests passing, Task Step 4: Test Invalid Inputs (`tests/invalidInputs.test.ts`) — 26 non-destructive safety tests, Task Step 5: Test Offline Fallback (`tests/offlineFallback.test.ts` & `docs/offline-runbook.md`) — 12 deterministic offline tests, Task Step 6: Check Polling and Speed (`tests/pollingSpeed.test.ts`, `client/components/RunOverlay.tsx`, `client/components/WorkflowCanvas.tsx`, `client/src/main.tsx`) — 6 tests, Task Step 7: Create Clean-Start Script (`seed/resetDb.ts`, `package.json`, `README.md`) — created database reset script with interactive confirmation prompt and `--yes` non-interactive override, and documented developer verification workflows. All 220 backend tests pass across 23 test files.
 
 ## Features Currently Being Built
 None.
@@ -115,6 +115,7 @@ No application bugs. All lint rules and TypeScript typechecks pass cleanly. Mong
 - Fixed 21 ESLint compiler warnings and errors across backend and test files (unused variables, async promise executors in connection helper hooks, prefer-const variables, and explicit any type casts).
 - Stabilized `RunOverlay` polling `useEffect` with `React.useRef` callbacks and parent `React.useCallback`, eliminating rapid re-fetch cycles on parent re-renders.
 - Isolated Dagre graph instantiation in `WorkflowCanvas.tsx` to prevent cross-workflow node accumulation.
+- Fixed `pollingSpeed.test.ts` to explicitly call `seedMetadata()` in `beforeAll` hook to prevent validation failures on clean database runs.
 
 ## Important Decisions
 1. Sequential execution for MVP.
@@ -1143,6 +1144,32 @@ All core backend engine and API layers are now complete:
 - `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
 - `pnpm run build` → **exit 0, client and server bundles build cleanly**
 - `pnpm vitest run tests/pollingSpeed.test.ts` → **6/6 PASS**
+- `pnpm run test` → **220/220 backend tests pass across 23 test files**
+- `pnpm run test:browser` → **12/12 Playwright browser acceptance tests pass**
+
+---
+
+## Step 7 — Create Clean-Start Script (Completed)
+
+### Files Created/Modified
+- `seed/resetDb.ts` — Created database reset helper executing database/collection level purging cleanly. Formulated with standard Node `readline` interactive prompt for y/N confirmation and argv parsing (`--yes`, `-y`, `--confirm`) to bypass prompts in CI and non-interactive developer scripting environments.
+- `package.json` — Exposed the `pnpm db:reset` command mapping directly to `tsx seed/resetDb.ts` for clean argument parsing without shell quoting friction.
+- `README.md` — Updated instructions with clear step-by-step repeatability guides covering installation, database start, seeding, running, verification commands, and safe database resets.
+
+### What Was Tested & Verified
+1. **Developer Clean Start Workflows**:
+   - Install dependencies: `pnpm install` installs cleanly with Node 24+ and pnpm 8+.
+   - Start database: Documented docker compose Mongo launch command.
+   - Seed database: `pnpm seed` populates metadata catalog and triggers/nodes/edges for both demo workflows.
+   - Run application: `pnpm dev` launches Express server (3001), React/Vite (5173), and Mock API (3002).
+2. **Safe Database Reset Prompting**:
+   - Running `pnpm db:reset` interactively prompts for confirmation. Pressing Enter (default N) or typing anything other than `y`/`yes` safely aborts data deletion.
+   - Passing `pnpm db:reset --yes` drops all collections immediately without blocking execution.
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm run build` → **exit 0, client and server bundles build cleanly**
 - `pnpm run test` → **220/220 backend tests pass across 23 test files**
 - `pnpm run test:browser` → **12/12 Playwright browser acceptance tests pass**
 
