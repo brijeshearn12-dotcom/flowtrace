@@ -93,10 +93,10 @@ Detection must work through deterministic phrase/action matching. Any LLM is opt
 `MONGODB_URI`, `MONGODB_DB`, `SERVER_PORT`, `CLIENT_URL`, `FORMS_API_BASE_URL`, `FORMS_API_TOKEN`, `LLM_ENABLED`, `LLM_MODEL`, and `LOG_LEVEL`. Never commit real secrets.
 
 ## Current Development Status
-Step 3 Browser Acceptance Tests complete. All 12 browser acceptance tests pass. All 176 backend tests pass across 20 test files.
+Step 4 Test Invalid Inputs complete. Full safety and non-destructive invalid input verification suite implemented (26 tests). All 202 backend tests pass across 21 test files, and all 12 browser acceptance tests pass.
 
 ## Completed Features
-Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`), Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`), Task 6 Step 1: Add Draft State, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx`), Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx`), Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts`), Task 6 Step 4 (Step 5): Add Approval Gate, Task 6 Step 5 (Step 6): Add Version History (`client/components/VersionHistory.tsx`), Task 6 Step 6 (Step 7): Test Fallback and Conflict (`tests/fallbackConflict.test.ts`), Task 7 Step 1: Run Unit Tests — 160 tests passing, **Task 7 Step 2: Run API Integration Tests** (`tests/apiIntegration.test.ts`) — 176 tests passing, **Task 7 Step 3: Run Browser Acceptance Tests** (`tests/browserAcceptance.test.ts`) — 12 browser acceptance tests covering the full judge flow, from clean start, seeding, detection execution, inspect, successful manual execution, log activity, branch rejection execution, manual patch save, agent proposal, and version history loading. All 12 browser tests pass.
+Requirements baseline, five minimum pre-development documents, initial architecture, UI system, this project brain, Git initialization with .gitignore configuration, Baseline Tools installation, creation of the 10 core project folders, defined MVP scope document (docs/mvp-scope.md), defined canonical IR models (shared/ir.ts), added Zod schemas for runtime validation (shared/schemas.ts), defined API contracts (docs/api-contract.md & shared/api.ts), implemented DAG graph validator and execution semantics (docs/execution-semantics.md & shared/validator.ts), designed MongoDB data model (docs/data-model.md), defined canonical execution algorithm (docs/execution-semantics.md updated), finalized architecture and data flow diagrams (docs/architecture.md updated), Task 3.1–3.7 (MongoDB persistence, version lifecycle, seeding, workflow routes), Task 4.1 Forms API adapter (`executor/formsAdapter.ts`), Task 4.2 Local Mock Forms API (`mock-forms-api/mockFormsAdapter.ts`), Task 4.3 Template Resolver (`executor/templateResolver.ts`), Task 4.4 Condition Evaluator (`executor/conditionEvaluator.ts`), Task 4.5 Sequential Executor (`executor/runWorkflow.ts`), Task 4.6 Run & Execution-Log API (`server/routes/runs.ts`), Deterministic Requirement Detector (`detector/index.ts`), Task 5 Step 1: Design Tokens (`client/styles/tokens.css` & `client/styles/UI_SYSTEM.md`), Task 5 Step 2: Workflow List (`client/pages/WorkflowHome.tsx`), Task 5 Step 3: Detection Composer (`client/components/DetectionComposer.tsx`), Task 5 Step 4: React Flow DAG Canvas (`client/components/WorkflowCanvas.tsx`), Task 5 Step 5: Node Inspector (`client/components/NodeInspector.tsx`), Task 5 Step 6: Build Trigger Panel (`client/components/TriggerPanel.tsx`), Task 5 Step 7: Build Live Overlay and Log (`client/components/RunOverlay.tsx` & `client/components/RunLog.tsx`), Task 6 Step 1: Add Draft State, Task 6 Step 2: Add Manual Node Editor (`client/components/NodeEditor.tsx`), Task 6 Step 3: Create Patch Preview (`client/components/PatchDiff.tsx`), Task 5.8 (Step 4): Build Agent Proposal Endpoint (`server/services/agentEditService.ts`), Task 6 Step 4 (Step 5): Add Approval Gate, Task 6 Step 5 (Step 6): Add Version History (`client/components/VersionHistory.tsx`), Task 6 Step 6 (Step 7): Test Fallback and Conflict (`tests/fallbackConflict.test.ts`), Task 7 Step 1: Run Unit Tests — 160 tests passing, Task 7 Step 2: Run API Integration Tests (`tests/apiIntegration.test.ts`) — 176 tests passing, Task 7 Step 3: Run Browser Acceptance Tests (`tests/browserAcceptance.test.ts`) — 12 browser acceptance tests passing, **Step 4: Test Invalid Inputs** (`tests/invalidInputs.test.ts`) — 26 non-destructive safety tests covering missing required fields, empty requirement text, unknown operations, invalid template/reference paths, cyclic workflows, and stale published versions. All 202 backend tests pass across 21 test files.
 
 ## Features Currently Being Built
 None.
@@ -143,7 +143,7 @@ LLM-only detection, production webhooks, cron scheduling, arbitrary agent action
 2. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), requirement detector tests (7), agent-edit unit and API tests (10), approval gate tests (3), fallback/conflict protection tests (4), version history tests (2), verification flow safety lifecycle test (1), and **P0 API integration tests (16)** — covering POST /api/detect, workflow list/get, validation (PATCH 422 + /validate 422), publish (stale-version 409 + success 200), run workflow (trigger 201 + invalid 422), run status, run logs, and agent proposal (success + warning). All non-DB tests pass. Total passing when DB is connected: **176 tests** across **20 test files**. Client builds successfully. Lint exit 0. Typecheck exit 0.
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), requirement detector tests (7), agent-edit unit and API tests (10), approval gate tests (3), fallback/conflict protection tests (4), version history tests (2), verification flow safety lifecycle test (1), P0 API integration tests (16), and **Step 4 Invalid Inputs Safety Suite (26)** — covering missing required fields, empty requirement text, unknown operations, invalid template/reference paths, cyclic workflows, and stale published version protections. All tests pass with non-destructive validation and clear error feedback. Total passing: **202 backend tests** across **21 test files**, and **12 browser acceptance tests**. Client builds successfully. Lint exit 0. Typecheck exit 0.
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
@@ -1032,8 +1032,53 @@ All core backend engine and API layers are now complete:
 - `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
 - `pnpm run test` → **160/160 tests pass successfully** (including the new safety lifecycle verification suite)
 
+---
+
+## Step 4 — Test Invalid Inputs (Completed)
+
+### Files Created/Modified
+- `tests/invalidInputs.test.ts` — Comprehensive non-destructive test suite (26 tests) covering invalid input edge cases across validator, executor, resolver, detector, and REST API endpoints.
+
+### What Was Tested & Verified
+1. **Missing Required Fields**:
+   - Workflows missing `id`, `name`, `trigger`, or node missing `id`/`name`/`type`/`action` fail schema validation (`validateWorkflow`) with clear error paths and messages.
+   - `POST /api/workflows` missing `id` or `name` returns `400 Bad Request`.
+   - `POST /api/workflows/:id/publish` without `baseVersion` returns `400 Bad Request`.
+   - `POST /api/workflows/:id/run` or `runWorkflow` with missing required trigger payload properties returns `422 Unprocessable Entity`, creates 0 run records in database, and leaves published workflows unmodified.
+2. **Empty Requirement Text**:
+   - `detectWorkflow('')`, `detectWorkflow('   ')`, and strings under 10 chars throw explicit `'Requirement string is too short or empty'` errors.
+   - `POST /api/detect` with empty, whitespace, or missing requirement returns `400 Bad Request` with clear error message, and does not mutate any existing workflows.
+3. **Unknown Operation**:
+   - `detectWorkflow` with unsupported / unallowlisted text returns `success: false`, `confidence: 0`, and clear warnings without crashing.
+   - `POST /api/workflows/:id/agent-edit` with unmapped prompt returns `success: false`, empty patch `[]`, and `Warning: Unknown instruction`, leaving published workflows unmodified.
+   - Workflows with invalid node `type` or empty `action` fail validation with readable error messages.
+   - `MockFormsAdapter` deterministic fallback handles unmapped function calls cleanly.
+4. **Invalid Template / Reference Path**:
+   - References to non-existent step IDs (`{{non_existent.key}}`) fail validation with `invalid_step_reference`.
+   - Forward references / references to non-ancestor steps fail validation with `non_ancestor_reference`.
+   - Non-existent `redirectTargetId` in failure policies fails validation with `invalid_redirect_target`.
+   - Runtime template resolution of missing trigger/step paths throws typed `TemplateResolutionError` (`TEMPLATE_REFERENCE_NOT_FOUND`).
+   - Condition evaluations with missing paths or type mismatches return `ConditionError` (`CONDITION_FIELD_RESOLUTION_ERROR` or `CONDITION_TYPE_MISMATCH`).
+   - `POST /api/workflows/:id/publish` on drafts with broken references returns `422 Unprocessable Entity` and blocks publication.
+5. **Cyclic Workflow**:
+   - Simple cycles (`A -> B -> A`), multi-node cycles (`A -> B -> C -> A`), and self-loops (`A -> A`) are detected with `cycle_detected` / `self_loop` error codes.
+   - `POST /api/workflows/:id/publish` on cyclic drafts returns `422 Unprocessable Entity` and leaves workflow in `draft` status.
+   - Execution attempts on unpublished/cyclic workflows reject safely.
+6. **Stale Published Version Protection**:
+   - `PATCH /api/workflows/:id?baseVersion=old` returns `409 Conflict` and prevents draft clobbering.
+   - `POST /api/workflows/:id/publish?baseVersion=old` returns `409 Conflict` and leaves the existing published version untouched and immutable.
+   - Publishing an already-published version returns `409 Conflict` ("locked").
+
+### Tests & Verification
+- `pnpm run lint` → **exit 0, all eslint checks pass with 0 warnings/errors**
+- `pnpm typecheck` → **exit 0, all TypeScript compiler checks pass**
+- `pnpm vitest run tests/invalidInputs.test.ts` → **26/26 PASS**
+- `pnpm run test` → **202/202 backend tests pass across 21 test files**
+- `pnpm run test:browser` → **12/12 Playwright browser acceptance tests pass**
+
 ## References
 
 [1]: /home/ubuntu/upload/Pasted_content.txt "Workflow Engine problem statement"
 [2]: /home/ubuntu/upload/Pasted_content_01.txt "Hackathon CTO execution brief"
 This update is based on the supplied documents [1] [2] [3].
+
