@@ -399,6 +399,7 @@ const App = () => {
                               : selectedWorkflow.nodes.find(n => n.id === selectedNode.id) || selectedNode)
                           : null
                         } 
+                        workflow={viewMode === 'draft' && localDraft ? localDraft : selectedWorkflow}
                         isEditable={viewMode === 'draft'}
                         onUpdateNode={handleUpdateNode}
                         onClose={() => setSelectedNode(null)} 

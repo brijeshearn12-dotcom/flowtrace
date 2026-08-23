@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Node as FTNode } from '../../shared/ir';
+import { Node as FTNode, Workflow } from '../../shared/ir';
+import { NodeEditor } from './NodeEditor';
 
 interface NodeInspectorProps {
   node: FTNode | null;
+  workflow?: Workflow;
   onClose?: () => void;
   isEditable?: boolean;
   onUpdateNode?: (updatedNode: FTNode) => void;
@@ -10,6 +12,7 @@ interface NodeInspectorProps {
 
 export const NodeInspector: React.FC<NodeInspectorProps> = ({
   node,
+  workflow,
   onClose,
   isEditable = false,
   onUpdateNode,
@@ -49,6 +52,28 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
 
   const isTrigger = node.action === 'trigger';
   const canEdit = isEditable && !isTrigger;
+
+  if (canEdit && workflow && onUpdateNode) {
+    return (
+      <div 
+        className="ft-card" 
+        style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 'var(--spacing-4)', 
+          position: 'relative',
+          boxSizing: 'border-box'
+        }}
+      >
+        <NodeEditor 
+          node={node} 
+          workflow={workflow} 
+          onUpdateNode={onUpdateNode} 
+          onClose={onClose} 
+        />
+      </div>
+    );
+  }
 
   const handleInputChange = (field: keyof FTNode, value: unknown) => {
     if (onUpdateNode) {
