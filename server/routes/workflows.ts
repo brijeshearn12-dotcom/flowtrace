@@ -234,8 +234,8 @@ router.post('/:id/run', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Trigger payload object is required under "payload"' });
     }
 
-    const { runWorkflow } = await import('../../executor/runWorkflow');
-    const { MockFormsAdapter } = await import('../../mock-forms-api/mockFormsAdapter');
+    const { runWorkflow } = await import('../../executor/runWorkflow.js');
+    const { MockFormsAdapter } = await import('../../mock-forms-api/mockFormsAdapter.js');
 
     const adapter = new MockFormsAdapter();
     const runResult = await runWorkflow(id, payload, adapter);

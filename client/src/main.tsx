@@ -4,6 +4,7 @@ import '../styles/tokens.css';
 import { WorkflowHome } from '../pages/WorkflowHome';
 import { WorkflowCanvas } from '../components/WorkflowCanvas';
 import { NodeInspector } from '../components/NodeInspector';
+import { TriggerPanel } from '../components/TriggerPanel';
 import { Workflow, Node } from '../../shared/ir';
 
 const App = () => {
@@ -140,7 +141,8 @@ const App = () => {
                     <div style={{ flex: 1, minWidth: '350px' }}>
                       <WorkflowCanvas workflow={selectedWorkflow} onNodeSelect={(node) => setSelectedNode(node)} />
                     </div>
-                    <div style={{ width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', width: '100%' }}>
+                      <TriggerPanel workflow={selectedWorkflow} />
                       <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />
                     </div>
                   </div>
