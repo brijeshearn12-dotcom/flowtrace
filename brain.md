@@ -139,11 +139,11 @@ No application bugs. All lint rules and typescript typechecks pass cleanly. Mong
 LLM-only detection, production webhooks, cron scheduling, arbitrary agent actions, retries, multi-tenancy, and a broad integration marketplace.
 
 ## Current Priorities
-1. Build Trigger Form and Runs Panel (Task 5.6).
+1. Build natural language natural patch editing system (Task 5.8).
 2. Rehearse deterministic demo.
 
 ## Testing Status
-Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), and requirement detector tests (7). All non-DB tests pass (91 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 136 tests. Client builds successfully (`vite build client` completed in 1.01s).
+Vitest test suite includes database connection verification, typed repository tests, version lifecycle service tests, Forms API adapter tests (8), local mock adapter tests (17), template resolver tests (31), condition evaluator tests (22), sequential executor tests (6), route API tests (9), and requirement detector tests (7). All non-DB tests pass (91 total without DB). MongoDB-dependent tests require a live Atlas connection. Total passing when DB is connected: 140 tests. Client builds successfully (`vite build client` completed in 2.98s).
 
 ## Deployment Status
 Not deployed. Local Docker Compose and localhost runbook are the baseline. Deployment target is **UNKNOWN — NEEDS CONFIRMATION**.
