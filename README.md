@@ -1,327 +1,424 @@
-# FlowTrace
+﻿<div align="center">
 
-> **A version-safe workflow definition service for turning business processes into validated, traceable workflow graphs.**
+# ⚡ FlowTrace
 
-FlowTrace addresses a practical governance problem: business workflows change often, but unsafe edits can break operations or erase the context needed to understand what changed. This MVP provides a typed workflow model, graph validation, immutable version snapshots, optimistic concurrency protection, and MongoDB persistence—giving teams a safe foundation for workflow automation.
+### Design, Validate, and Execute Business Workflows as Directed Acyclic Graphs
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/) [![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)](https://expressjs.com/) [![MongoDB](https://img.shields.io/badge/MongoDB-6-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/) [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-flowtrace--eu2k.onrender.com-blue?style=for-the-badge)](https://flowtrace-eu2k.onrender.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB_Atlas-Cloud-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Vitest](https://img.shields.io/badge/Vitest-232_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 
-## Contents
+<br/>
 
-- [🎯 Problem](#-problem)
-- [💡 Solution](#-solution)
-- [Why FlowTrace?](#why-flowtrace)
-- [✨ Core Features](#-core-features)
-- [🧪 Demo Workflows](#-demo-workflows)
-- [🏗️ Architecture](#️-architecture)
-- [🔄 Version Lifecycle](#-version-lifecycle)
-- [🗄️ Data Model](#️-data-model)
-- [🔌 API](#-api)
-- [🧰 Tech Stack](#-tech-stack)
-- [📁 Project Structure](#-project-structure)
-- [🚀 Getting Started](#-getting-started)
-- [✅ Verification](#-verification)
-- [MVP Scope](#mvp-scope)
+**[🚀 Live Demo](https://flowtrace-eu2k.onrender.com)** &nbsp;·&nbsp; **[⚙️ Run Locally](#-local-development)** &nbsp;·&nbsp; **[📖 API Reference](#-api-reference)** &nbsp;·&nbsp; **[🏗️ Architecture](#-architecture)**
 
-## 🎯 Problem
+</div>
 
-Operational processes—such as order fulfilment and asset approvals—are multi-step, conditional, and frequently revised. When their definitions are changed informally, an invalid edge, a circular dependency, or an edit based on an old version can silently compromise the process.
+---
 
-FlowTrace treats a workflow as a governed graph. It validates the definition before it is saved or published, preserves every version as a snapshot, and rejects stale edits rather than overwriting newer work. The result is a workflow foundation that is inspectable, reproducible, and ready to support controlled execution.
+## 🚀 Live Demo
 
-## 💡 Solution
+> **Try it now — no installation required.**
+>
+> **[https://flowtrace-eu2k.onrender.com](https://flowtrace-eu2k.onrender.com)**
 
-FlowTrace implements the lifecycle below for manually triggered workflow definitions:
+Open the live application in your browser. Three pre-seeded demo workflows are ready to explore:
+- **Order Placed Process** — fraud check → invoice → confirmation email → fulfillment alert
+- **Asset Request Approval** — conditional branching on approval/rejection with redirect failure policy
+- **User Registration Process** — identity verification → welcome email → Slack team alert
 
-```text
-Define → Validate → Draft a new version → Publish → Inspect history → Archive
-```
+---
 
-The Express API owns the business rules; a service creates and publishes versions; repositories isolate MongoDB access; and a shared TypeScript IR plus Zod schemas keep API and persistence data consistent. A seeded metadata catalog records the available forms, functions, buttons, and comparison operators for the project.
+## 🧭 What is FlowTrace?
 
-## Why FlowTrace?
+FlowTrace is a **workflow engineering platform** that lets you model, validate, visualize, and execute multi-step business processes as **Directed Acyclic Graphs (DAGs)**.
 
-| Workflow risk | FlowTrace approach |
+Instead of hand-crafting workflow configurations or relying on opaque BPMN tooling, FlowTrace provides:
+
+- A **typed Intermediate Representation (IR)** that describes triggers, nodes, edges, conditions, and failure policies
+- A **structural validator** that enforces DAG invariants (no cycles, no dangling references, valid ancestor-only step references)
+- A **sequential executor** that resolves template variables, evaluates conditions, and applies failure policies at runtime
+- A **visual DAG canvas** built with React Flow where you can inspect and edit workflows in real time
+- A **version-controlled persistence layer** on MongoDB Atlas with optimistic concurrency control
+
+Every workflow is a first-class data structure — not a bag of YAML or a hardcoded function chain.
+
+---
+
+## 🤔 Why FlowTrace?
+
+| Problem | FlowTrace Approach |
 |---|---|
-| Broken graph connections | Validates node references and self-loops |
-| Circular dependencies | Enforces a directed acyclic graph (DAG) |
-| Unsafe data dependencies | Allows step references only from ancestor steps |
-| Invalid fallback destination | Checks failure-redirect targets |
-| Silent overwrite from concurrent edits | Requires a matching `baseVersion` and returns `409` for stale edits |
-| Losing the published configuration | Stores each version as a separate immutable snapshot |
-| Unclear workflow evolution | Exposes version history and preserves archived workflow versions |
+| Business workflows buried in imperative code | Model workflows as typed, inspectable data with a strict schema |
+| No validation until runtime failures | DAG invariants enforced **before** execution — cycles, self-loops, dangling edge references, invalid step references all caught at save/publish time |
+| Impossible to safely modify live workflows | Optimistic concurrency control via version headers prevents conflicting edits; every mutation creates an immutable version snapshot |
+| Template variable chaos | `{{trigger.x}}` and `{{stepId.x}}` are resolved and validated — you cannot reference a step that is not your topological ancestor |
+| Failure handling is an afterthought | Per-node **failure policies**: `abort`, `skip`, or `redirect` to any valid node |
+| Audit trails are missing | Every edit, save, and publish writes an immutable audit event |
 
-## ✨ Core Features
+---
 
-### Workflow management
+## ✨ Key Features
 
-- Create, list, fetch, validate, patch, publish, and inspect history through REST endpoints.
-- Model manual triggers, action/form nodes, directed edges, conditions (`eq`, `neq`, `gt`), and failure policies (`abort`, `skip`, `redirect`).
-- Seed two realistic, published example workflows for a repeatable local demo.
+### 🕸️ Visual DAG Canvas
+Interactive workflow graph powered by **React Flow**. Nodes, edges, and conditional branching paths are rendered visually. Click any node to inspect its action, inputs, conditions, and failure policy in the side inspector.
 
-### Version safety
+### 🧩 Typed Intermediate Representation (IR)
+Every workflow is described in a canonical TypeScript IR — `Trigger`, `Node`, `Edge`, `Condition`, `FailurePolicy`, `Run`, `StepResult`. The IR is shared between the frontend, backend, detector, executor, and validator with zero drift.
 
-- Every edit creates a new workflow-version document; it never changes the source snapshot.
-- Publishing moves the workflow’s published-version pointer to a validated snapshot.
-- JSON Patch edits require `baseVersion` through `x-base-version` or `?baseVersion=`.
-- A stale base version is rejected with `409 Conflict` before a new draft is written.
-- Archiving changes lifecycle status without deleting version history.
-
-### Validation
-
-Validation runs at workflow creation, draft creation, explicit validation, and publishing. It checks:
-
-- Zod shape and enum constraints
-- duplicate node and edge IDs
-- missing node references and self-loops
-- cycles in the workflow DAG
-- redirect failure-policy targets
-- template references such as `{{trigger.orderId}}` and `{{previousStep.output}}`
-- ancestry, so a node cannot read output from a downstream or unrelated node
-
-### Persistence foundation
-
-MongoDB repositories are implemented for workflow headers, workflow versions, metadata, runs, and audit-event documents. The current HTTP API uses the workflow and version repositories; run and audit repositories are present as the persistence base for the execution/audit phases.
-
-## 🧪 Demo Workflows
-
-### `OrderPlaced`
-
-The seeded **Order Placed Process** demonstrates a straightforward sequential graph. Its manual trigger requires `orderId`, `customerEmail`, and `total`.
-
-```mermaid
-flowchart LR
-  A[Order Created Fraud Check] --> B[Create Invoice Notification]
-  B --> C[Send Confirmation Email]
-  C --> D[Fulfillment Slack Alert]
+```typescript
+// shared/ir.ts
+interface Node {
+  id: string;
+  name: string;
+  type: 'action' | 'form';
+  action: string;                       // e.g. "FraudService.check"
+  inputs: Record<string, unknown>;      // supports {{trigger.x}} templates
+  condition?: Condition;                // pre-condition for execution
+  failurePolicy?: FailurePolicy;        // abort | skip | redirect
+}
 ```
 
-### `AssetRequestApproval`
+### ✅ Structural Validator
+`shared/validator.ts` enforces all DAG invariants **before** any workflow can be published or executed:
 
-The seeded **Asset Request Approval Process** demonstrates conditional routing. Its trigger requires `requestId`, `approved`, and `amount`. A true `approved` value routes to the dispatch notification; any other value routes to rejection notification. The approved action also declares a redirect failure policy to a critical-failure alert.
+- Duplicate node / edge ID detection
+- Edge references to non-existent nodes
+- Self-loop detection
+- **Cycle detection** via depth-first search on the adjacency list
+- Invalid `redirectTargetId` in failure policies
+- Template variable references that point to non-ancestor nodes (topological ancestor check)
 
-```mermaid
-flowchart TD
-  A[Asset Request Approval Decision]
-  A -->|approved = true| B[Post Approved Asset]
-  A -->|approved ≠ true| C[Notify Rejection]
-  B -. failure redirect .-> D[Log Critical Failure Alert]
-```
+### 🔄 Sequential Executor with Template Resolution
+`executor/runWorkflow.ts` executes published workflows step by step:
 
-The failure policy and conditional edges are stored and validated in the current MVP; runtime execution of those paths is the next implementation phase.
+1. Loads the immutable published version from MongoDB
+2. Validates the trigger payload against the trigger JSON Schema
+3. Creates a `Run` record in the database
+4. Executes nodes in **topological order**
+5. Resolves `{{trigger.x}}` and `{{stepId.outputKey}}` template variables dynamically
+6. Evaluates edge conditions (`eq`, `neq`, `gt`) to determine traversal paths
+7. Applies per-node failure policies (`abort`, `skip`, `redirect`) on errors
+8. Persists step results and a final audit event
+
+### 📦 Immutable Version History
+Every save creates a new version snapshot in `workflowVersions`. Publishing requires passing the exact `baseVersion` to prevent stale overwrites. Full version history is browsable in the UI via the **Version History** panel.
+
+### 🔍 Workflow Detector
+`detector/index.ts` parses text requirements and deterministically maps them to known workflow patterns using phrase/keyword matching, returning a confidence score, explanation, warnings, and a fully validated IR draft.
+
+### 📝 JSON Patch Diff View
+Before saving, the **PatchDiff** panel shows you exactly what changed as structured `add`, `replace`, and `remove` operations — no surprises.
+
+### 🏃 Live Run Overlay
+Execute a workflow from the UI, supply the trigger payload, and watch the run unfold — each node transitions from `pending` → `running` → `success | failed | skipped` with live polling.
+
+### 🧪 Comprehensive Test Suite
+**232 tests** across **25 test files** using **Vitest**, covering:
+- DAG validation invariants
+- Executor execution paths (success, failure, redirect, skip, abort)
+- Template variable resolution
+- Condition evaluation
+- API route integration
+- Version lifecycle (draft → publish → history)
+- MongoDB persistence repositories
+- Optimistic concurrency (409 conflict detection)
+- Demo reset idempotency
+
+---
 
 ## 🏗️ Architecture
 
-```mermaid
-flowchart TD
-  Client[React + Vite client\n(current starter UI)] --> API[Express API routes]
-  API --> Service[VersionService\nLifecycle and concurrency rules]
-  API --> Validator[Shared Zod + DAG validator]
-  Service --> Repos[Typed repositories]
-  Repos --> Mongo[(MongoDB)]
-  Mongo --- Workflows[workflows]
-  Mongo --- Versions[workflowVersions]
-  Mongo --- Metadata[projectMetadata]
-  Mongo --- Runs[runs]
-  Mongo --- Audits[auditEvents]
-```
-
-- **Routes** are the HTTP boundary for workflow operations.
-- **VersionService** applies patches, validates candidate drafts, publishes versions, and archives workflows.
-- **Shared IR and validator** provide one canonical model and graph safety rules.
-- **Repositories** isolate MongoDB collection access from API and service code.
-- **MongoDB** stores logical workflow headers separately from their version snapshots.
-
-## 🔄 Version Lifecycle
+### System Overview
 
 ```mermaid
-stateDiagram-v2
-  [*] --> Draft: create workflow
-  Draft --> Draft: patch creates next version
-  Draft --> Published: validate + publish
-  Published --> Draft: edit creates next version
-  Draft --> Archived: archive
-  Published --> Archived: archive
+flowchart TB
+    subgraph Client["🖥️ React + Vite Frontend (client/)"]
+        WH[WorkflowHome Dashboard]
+        WC[WorkflowCanvas - React Flow DAG]
+        NI[NodeInspector Side Panel]
+        RO[RunOverlay - Live Execution]
+        VH[VersionHistory Panel]
+        PD[PatchDiff - Change Preview]
+        DC[DetectionComposer]
+    end
+
+    subgraph Server["⚡ Express API (server/)"]
+        WR["/api/workflows — REST Routes"]
+        RR["/api/runs — Run Routes"]
+        DR["/api/detect — Detect Route"]
+        VS[VersionService - Concurrency Control]
+        AES[AgentEditService - Proposal Generator]
+    end
+
+    subgraph Core["🧩 Shared Core Modules"]
+        IR[shared/ir.ts - Type Definitions]
+        VAL[shared/validator.ts - DAG Invariants + Zod]
+        DET[detector/index.ts - Pattern Matching]
+        EXEC[executor/runWorkflow.ts - Sequential Engine]
+        TR[executor/templateResolver.ts]
+        CE[executor/conditionEvaluator.ts]
+        FA[mock-forms-api/ - Forms Adapter]
+    end
+
+    subgraph DB["🍃 MongoDB Atlas"]
+        WF[(workflows)]
+        WV[(workflowVersions)]
+        RU[(runs)]
+        AE[(auditEvents)]
+        PM[(projectMetadata)]
+    end
+
+    Client --> Server
+    Server --> Core
+    Core --> DB
+    DB --> Server
+    Server --> Client
 ```
 
-Published snapshots remain intact because editing always derives a new version document. For example, if developer A begins from version 3, developer B advances the workflow to version 4, and A submits an edit with `baseVersion=3`, FlowTrace rejects it as stale. This prevents an accidental overwrite of version 4 and asks the caller to rebase on the latest version.
+### Data Flow
 
-## 🗄️ Data Model
+```
+Text Requirement
+      │
+      ▼
+detector/index.ts          ← deterministic pattern matching
+      │  DetectionResult { workflow IR, confidence, warnings }
+      ▼
+shared/validator.ts        ← Zod schema + DAG invariants
+      │  ValidationResult { success, errors[] }
+      ▼
+persistence/               ← VersionService.createWorkflow()
+      │  Immutable workflowVersion document
+      ▼
+POST /api/workflows/:id/publish
+      │  Optimistic concurrency check (baseVersion header)
+      ▼
+executor/runWorkflow.ts    ← POST /api/workflows/:id/run
+      │  Topological traversal, template resolution, conditions
+      ▼
+MongoDB runs collection    ← per-step StepResult, audit event
+      │
+      ▼
+React RunOverlay           ← polled live run status
+```
 
-| Collection | Purpose | Important fields |
+### MongoDB Collections
+
+| Collection | Description |
+|---|---|
+| `workflows` | Logical workflow records (ID, name, status, latest version, publishedVersionId) |
+| `workflowVersions` | Immutable version snapshots (trigger, nodes, edges per version number) |
+| `runs` | Execution records (trigger payload, per-step results, run status) |
+| `auditEvents` | Append-only log of every edit, publish, and run event |
+| `projectMetadata` | Project-level metadata (forms, functions, buttons, operations catalogs) |
+
+---
+
+## 🔌 API Reference
+
+| Method | Path | Description |
 |---|---|---|
-| `projectMetadata` | Seeded project catalog | `key`, `value`, `updatedAt` |
-| `workflows` | Logical workflow and lifecycle pointers | `_id`, `name`, `status`, `latestVersion`, `publishedVersionId` |
-| `workflowVersions` | Immutable workflow configuration snapshots | `workflowId`, `version`, `trigger`, `nodes`, `edges` |
-| `runs` | Persistence model for execution instances | `workflowId`, `workflowVersionId`, `status`, `triggerPayload`, `results` |
-| `auditEvents` | Persistence model for change/execution records | `actor`, `action`, `entityType`, `entityId`, `payload` |
+| `GET` | `/api/workflows` | List all workflows |
+| `POST` | `/api/workflows` | Create a new workflow |
+| `GET` | `/api/workflows/:id` | Get workflow (with optional `?version=N`) |
+| `PATCH` | `/api/workflows/:id` | Save a new draft version (requires `x-base-version` header) |
+| `POST` | `/api/workflows/:id/validate` | Validate workflow IR without saving |
+| `POST` | `/api/workflows/:id/publish` | Publish a version (requires `baseVersion`) |
+| `GET` | `/api/workflows/:id/history` | List all version snapshots |
+| `DELETE` | `/api/workflows/:id/versions/:n` | Delete a specific version |
+| `POST` | `/api/workflows/:id/run` | Execute a published workflow with a trigger payload |
+| `POST` | `/api/workflows/:id/agent-edit` | Generate a structured edit proposal from a prompt |
+| `POST` | `/api/detect` | Detect workflow pattern from a text requirement |
+| `GET` | `/health` | Health check + MongoDB connectivity ping |
 
-```mermaid
-erDiagram
-  WORKFLOWS ||--o{ WORKFLOW_VERSIONS : owns
-  WORKFLOWS ||--o{ RUNS : produces
-  WORKFLOW_VERSIONS ||--o{ RUNS : executed_as
-  WORKFLOWS ||--o{ AUDIT_EVENTS : records
-```
+All mutation endpoints that create new versions require the `x-base-version` header (or `baseVersion` query param) for **optimistic concurrency control**. A stale version returns `409 Conflict`.
 
-## 🔌 API
+---
 
-Base URL: `http://localhost:3001`
+## 🛠️ Tech Stack
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| `GET` | `/health` | Check API and MongoDB connectivity |
-| `GET` | `/api/workflows` | List workflow headers |
-| `POST` | `/api/workflows` | Create an empty draft workflow |
-| `GET` | `/api/workflows/:id` | Get a workflow version; optional `?version=n` |
-| `PATCH` | `/api/workflows/:id` | Create a patched draft from a required base version |
-| `POST` | `/api/workflows/:id/validate` | Validate the latest version |
-| `POST` | `/api/workflows/:id/publish` | Publish the latest validated version |
-| `GET` | `/api/workflows/:id/history` | List workflow-version snapshots, newest first |
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite, React Flow |
+| Backend | Node.js, Express 4, TypeScript |
+| Database | MongoDB Atlas (native driver) |
+| Validation | Zod (schema), custom DAG validator |
+| Testing | Vitest, 232 tests, 25 test files |
+| Build | pnpm workspaces, Vite, tsc |
+| Deployment | Single-service on Render (Express serves React static build + API) |
+| Package Manager | pnpm |
 
-Create a workflow:
+---
 
-```bash
-curl -X POST http://localhost:3001/api/workflows \
-  -H "Content-Type: application/json" \
-  -d '{"id":"wf_returns","name":"Returns Process"}'
-```
+## 💻 Local Development
 
-Create a new draft using JSON Patch and optimistic concurrency:
+### Prerequisites
 
-```bash
-curl -X PATCH "http://localhost:3001/api/workflows/wf_returns?baseVersion=1" \
-  -H "Content-Type: application/json" \
-  -d '[{"op":"add","path":"/nodes/0","value":{"id":"notify","name":"Notify team","type":"action","action":"Slack.post","inputs":{"message":"Return received"}}}]'
-```
+- **Node.js** v18+
+- **pnpm** v8+ (`npm install -g pnpm`)
+- **MongoDB Atlas** cluster (or local MongoDB)
 
-Validate and publish the latest version:
+### 1. Clone & Install
 
 ```bash
-curl -X POST http://localhost:3001/api/workflows/wf_returns/validate
-curl -X POST http://localhost:3001/api/workflows/wf_returns/publish
-```
-
-## 🧰 Tech Stack
-
-| Layer | Technology | Role |
-|---|---|---|
-| Language | TypeScript | Shared domain model and backend implementation |
-| API | Node.js, Express | REST API and health check |
-| Database | MongoDB, MongoDB Node.js driver | Persistent workflows, versions, metadata, runs, and audits |
-| Validation | Zod | Runtime workflow-shape validation |
-| Client | React, Vite, React Flow | Client foundation and planned graph UI |
-| Graph utilities | Dagre | Available for planned graph layout |
-| Testing | Vitest | Unit, persistence, route, schema, and lifecycle tests |
-| Tooling | pnpm, ESLint | Workspace and code-quality tooling |
-
-## 📁 Project Structure
-
-```text
-flowtrace/
-├── client/                 # React/Vite client starter
-├── docs/                   # Architecture, API, IR, and MVP design notes
-├── mock-forms-api/         # Mock service health endpoint
-├── persistence/            # MongoDB repositories and persistence types
-├── seed/                   # Metadata and demo workflow seeders
-├── server/
-│   ├── routes/             # Express workflow routes
-│   ├── services/           # Version lifecycle service
-│   ├── db.ts               # MongoDB connection management
-│   └── index.ts            # API server and health route
-├── shared/                 # Canonical workflow IR, Zod schemas, validator
-├── tests/                  # Vitest coverage for the implemented MVP
-├── brain.md                # Project implementation record
-└── package.json
-```
-
-## 🚀 Getting Started
-
-Follow these simple, repeatable commands to get FlowTrace up and running.
-
-### 1. Install Dependencies
-```bash
+git clone https://github.com/brijeshearn12-dotcom/flowtrace.git
+cd flowtrace
 pnpm install
 ```
 
-### 2. Start the Database
-FlowTrace requires MongoDB. You can start a local container using Docker:
-```bash
-docker compose up -d mongo
-```
-Alternatively, ensure a local `mongod` instance is running.
+### 2. Configure Environment
 
-### 3. Configure the Environment
-Create a `.env` file in the root directory:
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
 ```env
-MONGODB_URI=mongodb://localhost:27017/flowtrace
-MONGODB_DB=flowtrace
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/flowtrace
 PORT=3001
-CLIENT_URL=http://localhost:5173
-FORMS_API_BASE_URL=http://localhost:3002
-LLM_ENABLED=false
 ```
 
-### 4. Seed the Database
-Seed the metadata catalog and the two demo workflows:
+### 3. Seed the Database
+
 ```bash
-pnpm seed
+pnpm run seed
 ```
 
-### 5. Start the Application
-Start the backend, frontend, and local mock Forms API concurrently:
+Creates three demo workflows in published state: Order Placed, Asset Request Approval, and User Registration.
+
+### 4. Start All Dev Servers
+
 ```bash
-pnpm dev
+pnpm run dev
 ```
-Open `http://localhost:5173` in your browser.
 
----
+| Process | URL | Description |
+|---|---|---|
+| React (Vite HMR) | http://localhost:5173 | Frontend |
+| Express API | http://localhost:3001 | REST API |
+| Mock Forms API | http://localhost:3002 | Deterministic mock for execution |
 
-## 🛠️ Developer Verification & Commands
+### Available Scripts
 
-| Command | Action |
-|---|---|
-| `pnpm install` | Install all dependencies |
-| `pnpm seed` | Seed metadata and demo workflows |
-| `pnpm dev` | Run backend, client, and mock forms api |
-| `pnpm typecheck` | Run TypeScript compiler checks |
-| `pnpm lint` | Run ESLint static code analysis |
-| `pnpm test` | Run complete backend and integration test suite |
-| `pnpm test:browser` | Run Playwright browser acceptance tests |
-| `pnpm db:reset` | Reset all database collections safely (with confirmation) |
-
-### Safely Resetting Database Data
-To prevent accidental data destruction, running `pnpm db:reset` interactively prompts for confirmation:
 ```bash
-pnpm db:reset
-# WARNING: This will drop/clear all FlowTrace collections. Are you sure? (y/N): 
-```
-For non-interactive environments (CI, automation), bypass the confirmation prompt by passing the `--yes` or `-y` flag:
-```bash
-pnpm db:reset --yes
+pnpm run dev              # Start all three dev servers concurrently
+pnpm run build            # Build frontend + compile TypeScript server
+pnpm start                # Run production build (serves frontend + API on port 3001)
+pnpm test                 # Run full test suite (232 tests, isolated test DB)
+pnpm run seed             # Seed demo workflows
+pnpm run demo:reset       # Reset demo workflows without affecting custom ones
+pnpm run typecheck        # Full TypeScript type check
+pnpm run lint             # ESLint across all TypeScript files
 ```
 
 ---
 
-## ✅ Verification
+## 🧪 Testing
 
-Ensure your environment is fully healthy before pushing:
+Tests run against an isolated `flowtrace_test` database — your development data is never touched.
+
 ```bash
-pnpm typecheck
-pnpm lint
 pnpm test
-pnpm build
 ```
 
+```
+Test Files  24 passed (24)
+     Tests  232 passed (232)
+  Duration  ~136s
+```
 
-The test suite covers schemas, graph validation, MongoDB connectivity and repositories, the version lifecycle, seeding, and the implemented workflow routes. To verify a running database connection manually, open `http://localhost:3001/health`; a successful response is `{ "status": "ok", "database": "connected" }`.
+---
 
-## MVP Scope
+## 🚢 Production Deployment
 
-This repository currently delivers the workflow-definition, validation, persistence, and version-governance foundation. The following planned capabilities are intentionally not presented as complete: requirement-to-workflow detection, workflow execution and run/log API routes, agent edits, metadata-driven allowlist enforcement, and a finished React Flow interface. The mock Forms API currently exposes only its health endpoint.
+FlowTrace runs as a **single-service** on Render:
 
-That separation is deliberate: FlowTrace first makes workflow definitions safe and durable, then layers automation and user experience on top of a trustworthy lifecycle.
+```
+GitHub push
+    │
+    ▼
+Render Build: pnpm run build
+    │
+    ▼
+Render Start: pnpm start
+    │
+    ▼
+Express (port from env)
+    ├── /api/*      → REST API routes
+    ├── /health     → health check
+    └── /*          → React SPA (dist/client/index.html)
+```
 
-## Documentation
+**Live URL:** [https://flowtrace-eu2k.onrender.com](https://flowtrace-eu2k.onrender.com)
 
-The repository includes deeper technical notes in [architecture](docs/architecture.md), [architecture decisions](docs/architecture-decisions.md), [execution semantics](docs/execution-semantics.md), [API contract](docs/api-contract.md), [data model](docs/data-model.md), and [MVP scope](docs/mvp-scope.md). Some documents describe planned interfaces; the implementation and API table above reflect the currently available runtime surface.
+| Environment Variable | Description |
+|---|---|
+| `MONGODB_URI` | MongoDB Atlas connection string |
+| `PORT` | Server port (set automatically by Render) |
+| `CLIENT_URL` | Allowed CORS origin |
+
+---
+
+## 📁 Project Structure
+
+```
+flowtrace/
+├── client/                  # React + Vite frontend
+│   ├── components/          # WorkflowCanvas, NodeInspector, RunOverlay,
+│   │                        #   PatchDiff, VersionHistory, TriggerPanel,
+│   │                        #   DetectionComposer, NodeEditor, RunLog
+│   ├── pages/               # WorkflowHome (dashboard)
+│   └── styles/              # CSS design tokens + responsive layout
+│
+├── server/                  # Express API server
+│   ├── routes/              # workflows.ts, runs.ts, detect.ts
+│   ├── services/            # VersionService, AgentEditService
+│   └── index.ts             # Bootstrap, static serving, CORS
+│
+├── shared/                  # Framework-agnostic (used by all layers)
+│   ├── ir.ts                # Canonical type definitions
+│   ├── validator.ts         # DAG invariant validator
+│   └── schemas.ts           # Zod schemas for IR types
+│
+├── detector/                # Text → IR pattern matcher
+│   └── index.ts             # Deterministic keyword matching engine
+│
+├── executor/                # Workflow execution engine
+│   ├── runWorkflow.ts       # Main sequential executor
+│   ├── templateResolver.ts  # {{trigger.x}} / {{step.x}} resolution
+│   ├── conditionEvaluator.ts# Edge and node condition evaluation
+│   └── formsAdapter.ts      # IFormsAdapter interface
+│
+├── persistence/             # MongoDB typed repositories
+├── mock-forms-api/          # Deterministic mock forms service
+├── seed/                    # Database seed scripts
+├── tests/                   # 25 Vitest test files (232 tests)
+└── docs/                    # Architecture, API contract, data model docs
+```
+
+---
+
+## 📄 Documentation
+
+| Document | Contents |
+|---|---|
+| [`docs/architecture.md`](./docs/architecture.md) | System topology and component responsibilities |
+| [`docs/api-contract.md`](./docs/api-contract.md) | Full API contract with request/response examples |
+| [`docs/data-model.md`](./docs/data-model.md) | MongoDB collection schemas |
+| [`docs/execution-semantics.md`](./docs/execution-semantics.md) | DAG invariants, execution algorithm, failure policies |
+| [`docs/architecture-decisions.md`](./docs/architecture-decisions.md) | Key design decisions and trade-offs |
+
+---
+
+<div align="center">
+
+Built with TypeScript · React · Express · MongoDB Atlas · React Flow · Vitest · pnpm
+
+**[🚀 Try the Live Demo](https://flowtrace-eu2k.onrender.com)**
+
+</div>
