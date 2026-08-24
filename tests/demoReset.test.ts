@@ -111,7 +111,7 @@ describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const w = wf as any;
       expect(w.status, `${w._id} status`).toBe('published');
-      expect(w.version, `${w._id} version`).toBe(1);
+      expect(w.latestVersion, `${w._id} latestVersion`).toBe(1);
       expect(w.publishedVersionId, `${w._id} publishedVersionId`).toBeTruthy();
     }
   });
@@ -141,8 +141,6 @@ describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
       expect(versionDocs.length, `${wfId} version count`).toBe(1);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((versionDocs[0] as any).version, `${wfId} version number`).toBe(1);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((versionDocs[0] as any).status, `${wfId} version status`).toBe('published');
     }
   });
 

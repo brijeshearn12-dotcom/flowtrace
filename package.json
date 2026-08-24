@@ -10,6 +10,7 @@
     "build": "pnpm run build:client && pnpm run build:server",
     "build:client": "vite build client",
     "build:server": "tsc -p server/tsconfig.json",
+    "start": "node dist/server/server/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "cmd /C \"set NODE_TLS_REJECT_UNAUTHORIZED=0&& vitest run --fileParallelism=false --maxWorkers=1 --exclude tests/browserAcceptance.test.ts\"",

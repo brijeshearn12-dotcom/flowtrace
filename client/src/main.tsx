@@ -12,6 +12,17 @@ import { VersionHistory } from '../components/VersionHistory';
 import { Workflow, Node } from '../../shared/ir';
 import { validateWorkflow } from '../../shared/validator';
 
+// Prepend VITE_API_URL to api calls when defined in production environment
+const originalFetch = window.fetch;
+window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+  const apiBase = import.meta.env.VITE_API_URL || '';
+  if (typeof input === 'string' && input.startsWith('/api')) {
+    input = `${apiBase}${input}`;
+  } else if (input instanceof URL && input.pathname.startsWith('/api')) {
+    input = new URL(`${apiBase}${input.pathname}${input.search}`);
+  }
+  return originalFetch(input, init);
+};
 
 const App = () => {
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
