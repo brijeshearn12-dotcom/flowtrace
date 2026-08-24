@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import { connectDB } from './db';
 import workflowsRouter from './routes/workflows';
@@ -8,6 +9,10 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
+
+// Serve static client assets
+const clientPath = path.join(__dirname, '../../client');
+app.use(express.static(clientPath));
 
 // Production-safe CORS middleware
 app.use((req, res, next) => {
@@ -49,6 +54,14 @@ app.get('/api/health', async (_req, res) => {
     const message = error instanceof Error ? error.message : String(error);
     res.status(500).json({ status: 'error', database: 'disconnected', error: message });
   }
+});
+
+// SPA fallback routing
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path === '/health') {
+    return next();
+  }
+  res.sendFile(path.join(clientPath, 'index.html'));
 });
 
 // Initialize database connection on startup
