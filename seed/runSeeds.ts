@@ -1,6 +1,7 @@
 import { seedMetadata } from './metadata';
 import { seedOrderPlaced } from './orderPlaced';
 import { seedAssetRequestApproval } from './assetRequestApproval';
+import { seedUserRegistration } from './userRegistration';
 import { closeDB } from '../server/db';
 
 async function run(): Promise<void> {
@@ -8,6 +9,7 @@ async function run(): Promise<void> {
   await seedMetadata();
   await seedOrderPlaced();
   await seedAssetRequestApproval();
+  await seedUserRegistration();
   console.log('=== SEED RUNNER COMPLETE ===');
 }
 

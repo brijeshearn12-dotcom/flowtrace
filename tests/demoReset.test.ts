@@ -16,8 +16,9 @@ import { COLLECTIONS } from '../persistence/constants';
 import { seedMetadata } from '../seed/metadata';
 import { seedOrderPlaced } from '../seed/orderPlaced';
 import { seedAssetRequestApproval } from '../seed/assetRequestApproval';
+import { seedUserRegistration } from '../seed/userRegistration';
 
-const DEMO_WORKFLOW_IDS = ['wf_order_placed', 'wf_asset_request_approval'] as const;
+const DEMO_WORKFLOW_IDS = ['wf_order_placed', 'wf_asset_request_approval', 'wf_user_registration'] as const;
 const UNRELATED_WF_ID = 'wf_demotest_unrelated';
 
 describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
@@ -41,6 +42,7 @@ describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
     // 3. Re-seed demo workflows (delete old + create + publish v1)
     await seedOrderPlaced();
     await seedAssetRequestApproval();
+    await seedUserRegistration();
   }
 
   /** Helper: snapshot the relevant demo state for comparison. */
@@ -96,15 +98,15 @@ describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
 
   // ─── Test 1: First reset produces correct published state ─────────────────
 
-  it('1. first reset: both demo workflows are created and published at version 1', async () => {
+  it('1. first reset: all three demo workflows are created and published at version 1', async () => {
     if (!isDbAvailable) return;
 
     await runDemoReset();
     const { workflows, versions, metadataCount, runCount } = await captureState();
 
     expect(metadataCount, 'metadata key count').toBe(4);
-    expect(workflows.length, 'demo workflow count').toBe(2);
-    expect(versions.length, 'demo version count').toBe(2);
+    expect(workflows.length, 'demo workflow count').toBe(3);
+    expect(versions.length, 'demo version count').toBe(3);
     expect(runCount, 'demo run count after reset').toBe(0);
 
     for (const wf of workflows) {
@@ -152,7 +154,7 @@ describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
     if (!isDbAvailable) return;
     stateAfterReset1 = await captureState();
     // Basic sanity — should already pass from test 1
-    expect(stateAfterReset1.workflows.length).toBe(2);
+    expect(stateAfterReset1.workflows.length).toBe(3);
   });
 
   // ─── Test 5: Second reset produces identical state ────────────────────────
@@ -195,10 +197,10 @@ describe('Step 11: Demo Reset — Idempotency and Correctness Suite', () => {
 
   // ─── Test 6: Version count stays exactly 2 after second reset ────────────
 
-  it('6. second reset: version count remains 2 (old versions are cleared first)', async () => {
+  it('6. second reset: version count remains 3 (old versions are cleared first)', async () => {
     if (!isDbAvailable) return;
     const { versions } = await captureState();
-    expect(versions.length).toBe(2);
+    expect(versions.length).toBe(3);
   });
 
   // ─── Test 7: Runs are cleared on each reset ───────────────────────────────

@@ -24,9 +24,10 @@ import { COLLECTIONS } from '../persistence/constants';
 import { seedMetadata } from './metadata';
 import { seedOrderPlaced } from './orderPlaced';
 import { seedAssetRequestApproval } from './assetRequestApproval';
+import { seedUserRegistration } from './userRegistration';
 
 /** Canonical demo workflow IDs — the only logical records this script touches. */
-const DEMO_WORKFLOW_IDS = ['wf_order_placed', 'wf_asset_request_approval'] as const;
+const DEMO_WORKFLOW_IDS = ['wf_order_placed', 'wf_asset_request_approval', 'wf_user_registration'] as const;
 
 async function clearDemoData(): Promise<void> {
   const db = getDb();
@@ -65,8 +66,8 @@ async function verifyDemoState(): Promise<void> {
 
   console.log('\n=== DEMO RESET VERIFICATION ===');
   console.log(`  Metadata keys:       ${metadataCount} (expected 4: forms, functions, buttons, operations)`);
-  console.log(`  Demo workflows:      ${workflows.length} (expected 2)`);
-  console.log(`  Demo versions:       ${versions.length} (expected 2 — one per workflow)`);
+  console.log(`  Demo workflows:      ${workflows.length} (expected 3)`);
+  console.log(`  Demo versions:       ${versions.length} (expected 3 — one per workflow)`);
   console.log(`  Demo runs (cleared): ${runCount} (expected 0)`);
 
   for (const wf of workflows) {
@@ -75,20 +76,20 @@ async function verifyDemoState(): Promise<void> {
     console.log(`  Workflow: ${w._id}`);
     console.log(`    name:    ${w.name}`);
     console.log(`    status:  ${w.status} (expected: published)`);
-    console.log(`    version: ${w.version} (expected: 1)`);
+    console.log(`    version: ${w.latestVersion ?? w.version} (expected: 1)`);
     console.log(`    publishedVersionId: ${w.publishedVersionId ?? '(none)'}`);
   }
 
   const issues: string[] = [];
-  if (workflows.length !== 2) issues.push(`Expected 2 demo workflows, got ${workflows.length}`);
-  if (versions.length !== 2) issues.push(`Expected 2 demo versions, got ${versions.length}`);
+  if (workflows.length !== 3) issues.push(`Expected 3 demo workflows, got ${workflows.length}`);
+  if (versions.length !== 3) issues.push(`Expected 3 demo versions, got ${versions.length}`);
   if (metadataCount !== 4) issues.push(`Expected 4 metadata keys, got ${metadataCount}`);
   if (runCount !== 0) issues.push(`Expected 0 demo runs after reset, got ${runCount}`);
   for (const wf of workflows) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = wf as any;
     if (w.status !== 'published') issues.push(`Workflow ${w._id} status is "${w.status}", expected "published"`);
-    if (w.version !== 1) issues.push(`Workflow ${w._id} version is ${w.version}, expected 1`);
+    if ((w.latestVersion ?? w.version) !== 1) issues.push(`Workflow ${w._id} version is ${w.latestVersion ?? w.version}, expected 1`);
     if (!w.publishedVersionId) issues.push(`Workflow ${w._id} missing publishedVersionId`);
   }
 
@@ -122,9 +123,10 @@ async function demoReset(): Promise<void> {
   console.log('[4/4] Re-seeding demo workflows (create + publish v1)...');
   await seedOrderPlaced();
   await seedAssetRequestApproval();
+  await seedUserRegistration();
 
   console.log('\n=== DEMO RESET COMPLETE ===');
-  console.log('Both demo workflows are now Published Version 1.');
+  console.log('All three demo workflows are now Published Version 1.');
   console.log('Mock Forms API is stateless — no API state to reset.');
   console.log('To run the application:  pnpm dev');
   console.log('To run tests:            pnpm test');
@@ -133,6 +135,8 @@ async function demoReset(): Promise<void> {
     await verifyDemoState();
   }
 }
+
+
 
 demoReset()
   .then(async () => {
